@@ -1,6 +1,6 @@
 # Python
 backend/__pycache__/
-backend/py[cod]
+backend/**/*.py[cod]
 backend/*$py.class
 backend/*.so
 backend/.Python
@@ -12,10 +12,10 @@ backend/build/
 backend/.eggs/
 
 # IDE
-backend/.vscode/
-backend/.idea/
-backend/*.swp
-backend/*.swo
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # Environment
 backend/.env
