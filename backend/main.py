@@ -13,10 +13,29 @@ from app.websocket.router import ws_router
 from app.core.exceptions import setup_exception_handlers
 from app.core.state_manager import state_manager
 from app.database.connection import init_db
+from app.ai.yolo_engine import YOLOEngine
+from app.ai.occupancy_engine import OccupancyEngine
+from app.ai.lookup_table import LookupTable
+from app.ai.fusion_engine import FusionEngine
+from app.ai.cales_engine import CALESEngine
+from app.ai.decision_engine import DecisionEngine
+
+# Global AI engine instances
+yolo_engine = None
+occupancy_engine = None
+lookup_table = None
+fusion_engine = None
+cales_engine = None
+decision_engine = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Application lifespan handler.
+    Runs on startup and shutdown.
+    """
+    # --- Startup ---
     print("=" * 70)
     print("PROJECT THEMIS - Railway Decision Intelligence Platform")
     print(f"Version: {settings.APP_VERSION}")
@@ -38,9 +57,23 @@ async def lifespan(app: FastAPI):
         print("[INFO] Continuing without database...")
 
     # Initialize AI model
+    global yolo_engine, occupancy_engine, lookup_table, fusion_engine, cales_engine, decision_engine
+
+    print("[INFO] Initializing AI engines...")
+    occupancy_engine = OccupancyEngine()
+    lookup_table = LookupTable()
+    fusion_engine = FusionEngine()
+    cales_engine = CALESEngine()
+    decision_engine = DecisionEngine()
+    print("[OK] AI engines initialized (occupancy, lookup, fusion, cales, decision)")
+
     print("[INFO] Loading YOLO11s model...")
-    # TODO: Load YOLO model
-    print("[OK] AI model loaded (placeholder)")
+    yolo_engine = YOLOEngine(model_path=settings.MODEL_PATH, confidence=settings.MODEL_CONFIDENCE)
+    yolo_loaded = yolo_engine.load()
+    if yolo_loaded:
+        print("[OK] YOLO model loaded")
+    else:
+        print("[WARN] YOLO model not loaded (weights not found)")
 
     # Initialize State Manager
     print("[INFO] Initializing State Manager...")
