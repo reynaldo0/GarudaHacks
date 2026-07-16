@@ -1,3 +1,10 @@
+"""
+PROJECT THEMIS - Database Connection
+Version: 5.0
+
+PostgreSQL database connection and session management.
+"""
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from app.config.settings import settings

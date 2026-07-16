@@ -1,3 +1,10 @@
+"""
+PROJECT THEMIS - Database Models
+Version: 5.0
+
+SQLAlchemy models for SQLite database.
+"""
+
 from datetime import datetime
 from sqlalchemy import (
     Column,
@@ -28,7 +35,7 @@ class OccupancyHistory(Base):
     detected_persons = Column(Integer, default=0)
     capacity = Column(Integer, default=200)
     occupancy_percentage = Column(Float, default=0.0)
-    status = Column(String(20), default="LOW")
+    status = Column(String(20), default="LOW")  # LOW, NORMAL, HIGH, FULL, OVERCAPACITY
     camera_id = Column(String(100), nullable=True)
 
 
@@ -56,8 +63,8 @@ class WarningHistory(Base):
     timestamp = Column(DateTime, default=datetime.utcnow, nullable=False)
     train_id = Column(String(50), nullable=False)
     car_id = Column(Integer, nullable=False)
-    warning_type = Column(String(50), nullable=False)
-    severity = Column(String(20), nullable=False)
+    warning_type = Column(String(50), nullable=False)  # HIGH_OCCUPANCY, FULL, OVERCAPACITY
+    severity = Column(String(20), nullable=False)  # INFO, WARNING, CRITICAL
     message = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
 
