@@ -85,6 +85,7 @@ class StateManager:
                 occupancy_percentage=round(occupancy_pct, 2),
                 status=status,
                 risk_score=round(risk_score, 2),
+                camera_id=camera_id,
                 timestamp=datetime.utcnow(),
             )
 
@@ -106,11 +107,13 @@ class StateManager:
 
     def get_train_state(self, train_id: str) -> Optional[TrainState]:
         """Get current state of a train."""
-        return self._trains.get(train_id)
+        with self._data_lock:
+            return self._trains.get(train_id)
 
     def get_all_trains(self) -> List[TrainState]:
         """Get all train states."""
-        return list(self._trains.values())
+        with self._data_lock:
+            return list(self._trains.values())
 
     # --- Warnings ---
     def _check_warnings(self, train_id: str, car: CarOccupancy):
@@ -130,10 +133,11 @@ class StateManager:
 
     def get_active_warnings(self, train_id: str = None) -> List[Warning]:
         """Get active warnings, optionally filtered by train."""
-        warnings = [w for w in self._warnings if w.is_active]
-        if train_id:
-            warnings = [w for w in warnings if w.train_id == train_id]
-        return warnings
+        with self._data_lock:
+            warnings = [w for w in self._warnings if w.is_active]
+            if train_id:
+                warnings = [w for w in warnings if w.train_id == train_id]
+            return warnings
 
     def clear_old_warnings(self, max_age_seconds: int = 300):
         """Clear warnings older than max_age_seconds."""
@@ -149,8 +153,9 @@ class StateManager:
 
     def get_last_decision(self, train_id: str) -> Optional[Decision]:
         """Get the most recent decision for a train."""
-        train_decisions = [d for d in self._decisions if d.train_id == train_id]
-        return train_decisions[-1] if train_decisions else None
+        with self._data_lock:
+            train_decisions = [d for d in self._decisions if d.train_id == train_id]
+            return train_decisions[-1] if train_decisions else None
 
     # --- Camera Status ---
     def update_camera_status(self, camera_id: str, status: dict):
@@ -159,7 +164,8 @@ class StateManager:
 
     def get_camera_status(self, camera_id: str) -> Optional[dict]:
         """Get camera status."""
-        return self._camera_status.get(camera_id)
+        with self._data_lock:
+            return self._camera_status.get(camera_id)
 
     # --- Helpers ---
     @staticmethod
@@ -190,17 +196,19 @@ class StateManager:
 
     def get_uptime(self) -> float:
         """Get system uptime in seconds."""
-        return time.time() - self._system_start_time
+        with self._data_lock:
+            return time.time() - self._system_start_time
 
     def get_system_summary(self) -> dict:
         """Get a summary of the system state."""
-        return {
-            "trains": len(self._trains),
-            "active_warnings": len(self.get_active_warnings()),
-            "total_decisions": len(self._decisions),
-            "active_cameras": len(self._camera_status),
-            "uptime_seconds": round(self.get_uptime(), 2),
-        }
+        with self._data_lock:
+            return {
+                "trains": len(self._trains),
+                "activeWarnings": len([w for w in self._warnings if w.is_active]),
+                "totalDecisions": len(self._decisions),
+                "activeCameras": len(self._camera_status),
+                "uptimeSeconds": round(time.time() - self._system_start_time, 2),
+            }
 
 
 state_manager = StateManager()
