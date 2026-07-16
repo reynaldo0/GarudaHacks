@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { apiClient } from "@/lib/api";
-import { PlayCircle, RotateCcw, CheckCircle, Zap, Cloud, Sun, Moon, TrainFront } from "lucide-react";
+import { RotateCcw, CheckCircle, Zap, Cloud, Sun, Moon, TrainFront } from "lucide-react";
 import clsx from "clsx";
 
 const scenarios = [

@@ -81,3 +81,16 @@ export interface SystemHealthItem {
   value: string;
   icon: string;
 }
+
+export interface OccupancyCarResponse {
+  car_id: number;
+  occupancy_percentage?: number;
+  occupancy?: number;
+  status: string;
+  person_count?: number;
+  passengers?: number;
+  capacity?: number;
+  prediction?: Record<string, unknown> | null;
+  camera_status?: string;
+  recommendation?: Record<string, unknown> | null;
+}

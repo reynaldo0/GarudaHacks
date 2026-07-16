@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { History as HistoryIcon, WifiOff, Loader2 } from "lucide-react";
+import { WifiOff, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 
 interface HistoryRecord {

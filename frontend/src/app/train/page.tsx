@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
 import { TrainOverview } from "@/components/TrainOverview";
 import { OccupancyChart } from "@/components/OccupancyChart";
-import { CarOccupancy } from "@/types";
+import { CarOccupancy, OccupancyCarResponse } from "@/types";
 import { WifiOff, Loader2, Users } from "lucide-react";
 import clsx from "clsx";
 
@@ -19,9 +19,9 @@ export default function TrainPage() {
         const data = await apiClient.getOccupancy();
         if (data?.cars) {
           setCars(
-            data.cars.map((c: any) => ({
+            data.cars.map((c: OccupancyCarResponse) => ({
               carId: c.car_id,
-              occupancyPct: c.occupancy_percentage || c.occupancy * 100,
+              occupancyPct: c.occupancy_percentage || (c.occupancy ?? 0) * 100,
               status: c.status,
               passengers: c.person_count || c.passengers || 0,
               capacity: c.capacity || 200,

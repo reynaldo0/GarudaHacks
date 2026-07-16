@@ -12,7 +12,7 @@ import { SystemHealth } from "@/components/SystemHealth";
 import { apiClient } from "@/lib/api";
 import { useAppStore } from "@/store/useAppStore";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import { CarOccupancy, SystemState } from "@/types";
+import { SystemState, OccupancyCarResponse } from "@/types";
 
 export default function DashboardPage() {
   const {
@@ -45,9 +45,9 @@ export default function DashboardPage() {
             const occData = await apiClient.getOccupancy();
             if (occData?.cars) {
               setCars(
-                occData.cars.map((c: any) => ({
+                occData.cars.map((c: OccupancyCarResponse) => ({
                   carId: c.car_id,
-                  occupancyPct: c.occupancy_percentage || c.occupancy * 100,
+                  occupancyPct: c.occupancy_percentage || (c.occupancy ?? 0) * 100,
                   status: c.status,
                   passengers: c.person_count || c.passengers || 0,
                   capacity: c.capacity || 200,
@@ -83,6 +83,7 @@ export default function DashboardPage() {
       }
     }
     fetchInitialState();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const totalPassengers =

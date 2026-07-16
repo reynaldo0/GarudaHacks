@@ -1,0 +1,964 @@
+{
+  "info": {
+    "name": "PROJECT THEMIS - Backend API v7",
+    "description": "Complete API test collection for PROJECT THEMIS Backend v7\n\nBase URL: http://localhost:8000\nWebSocket URL: ws://localhost:8000/ws\nAPI Key: themis-unity-key-2026\n\nAll endpoints return JSON with 'success' field and 'data' field.\nAll keys use camelCase.\n\nCamera naming: car{XX}_cam{YY} (20 cameras, 2 per car)\n  car01_cam01 = Car 1, front camera\n  car01_cam02 = Car 1, rear camera\n  ...\n  car10_cam02 = Car 10, rear camera\n\nImport this collection into Postman to test all endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "apiKey",
+      "value": "themis-unity-key-2026"
+    },
+    {
+      "key": "trainId",
+      "value": "SF10-001"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Root & Health",
+      "item": [
+        {
+          "name": "GET / - App Info",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has name field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('name'); });",
+                  "pm.test('Name is PROJECT THEMIS', () => { const d = pm.response.json(); pm.expect(d.name).to.equal('PROJECT THEMIS'); });",
+                  "pm.test('Has version field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('version'); });",
+                  "pm.test('Status is running', () => { const d = pm.response.json(); pm.expect(d.status).to.equal('running'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/",
+            "description": "Get application information.\n\nResponse:\n```json\n{\n  \"name\": \"PROJECT THEMIS\",\n  \"version\": \"7.0.0\",\n  \"status\": \"running\",\n  \"docs\": \"/docs\"\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /health - Root Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has status field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('status'); });",
+                  "pm.test('Status is healthy', () => { const d = pm.response.json(); pm.expect(d.status).to.equal('healthy'); });",
+                  "pm.test('Has version field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('version'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health",
+            "description": "Simple health check.\n\nResponse:\n```json\n{\n  \"status\": \"healthy\",\n  \"version\": \"7.0.0\"\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/health - Detailed Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has services', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('services'); });",
+                  "pm.test('Has uptime', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('uptime'); });",
+                  "pm.test('Backend is running', () => { const d = pm.response.json(); pm.expect(d.data.services.backend).to.equal('running'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/health",
+            "description": "Detailed health check with service status.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"healthy\",\n    \"version\": \"7.0.0\",\n    \"timestamp\": \"2026-07-15T...\",\n    \"uptime\": 1234.56,\n    \"services\": {\n      \"backend\": \"running\",\n      \"database\": \"connected\",\n      \"ai\": \"loaded\",\n      \"websocket\": \"active\"\n    }\n  }\n}\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - System State",
+      "item": [
+        {
+          "name": "GET /api/v1/state - Full System State",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has train data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('train'); });",
+                  "pm.test('Has system summary', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('system'); });",
+                  "pm.test('Has timestamp', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('timestamp'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/state",
+            "description": "Get complete system state from State Manager.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"timestamp\": \"2026-07-15T...\",\n    \"train\": {\n      \"id\": \"SF10-001\",\n      \"formation\": \"SF10\",\n      \"totalCars\": 10,\n      \"totalPassengers\": 523,\n      \"totalCapacity\": 2000,\n      \"percentage\": 26.15,\n      \"status\": \"NORMAL\"\n    },\n    \"occupancy\": {\n      \"totalPassengers\": 523,\n      \"totalCapacity\": 2000,\n      \"percentage\": 26.15,\n      \"status\": \"NORMAL\"\n    },\n    \"warning\": null,\n    \"system\": {\n      \"trains\": 1,\n      \"activeWarnings\": 0,\n      \"totalDecisions\": 0,\n      \"activeCameras\": 0,\n      \"uptimeSeconds\": 1234.56\n    }\n  }\n}\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - Occupancy",
+      "item": [
+        {
+          "name": "GET /api/v1/occupancy - All Cars",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has cars array', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('cars'); pm.expect(d.data.cars).to.be.an('array'); });",
+                  "pm.test('Has trainId', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('trainId'); });",
+                  "pm.test('Has timestamp', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('timestamp'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/occupancy",
+            "description": "Get occupancy for all cars in current train.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"trainId\": \"SF10-001\",\n    \"station\": \"Manggarai\",\n    \"timestamp\": \"2026-07-15T...\",\n    \"cars\": [\n      {\n        \"carId\": 1,\n        \"occupancyPct\": 45.0,\n        \"status\": \"NORMAL\",\n        \"passengers\": 90,\n        \"capacity\": 200,\n        \"cameraStatus\": \"active\",\n        \"cameraId\": \"car01_cam01\",\n        \"riskScore\": 0.3\n      },\n      {\n        \"carId\": 2,\n        \"occupancyPct\": 22.5,\n        \"status\": \"LOW\",\n        \"passengers\": 45,\n        \"capacity\": 200,\n        \"cameraStatus\": \"active\",\n        \"cameraId\": \"car02_cam01\",\n        \"riskScore\": 0.1\n      }\n    ]\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/occupancy/{car_id} - Single Car",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has car data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('carId'); });",
+                  "pm.test('Car ID matches', () => { const d = pm.response.json(); pm.expect(d.data.carId).to.equal(4); });",
+                  "pm.test('Has occupancy percentage', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('occupancyPct'); });",
+                  "pm.test('Has status', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('status'); });",
+                  "pm.test('Has riskScore', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('riskScore'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/occupancy/4",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "occupancy", "4"]
+            },
+            "description": "Get occupancy for specific car (Car 4).\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"carId\": 4,\n    \"occupancyPct\": 92.0,\n    \"status\": \"FULL\",\n    \"passengers\": 184,\n    \"capacity\": 200,\n    \"riskScore\": 0.9,\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/occupancy/1 - Car 1 (LOW)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has car data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('carId'); });",
+                  "pm.test('Car ID is 1', () => { const d = pm.response.json(); pm.expect(d.data.carId).to.equal(1); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/occupancy/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "occupancy", "1"]
+            },
+            "description": "Get occupancy for Car 1."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/occupancy/10 - Car 10",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has car data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('carId'); });",
+                  "pm.test('Car ID is 10', () => { const d = pm.response.json(); pm.expect(d.data.carId).to.equal(10); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/occupancy/10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "occupancy", "10"]
+            },
+            "description": "Get occupancy for Car 10."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 - Recommendation",
+      "item": [
+        {
+          "name": "GET /api/v1/recommendation - AI Recommendation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has data field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('data'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/recommendation",
+            "description": "Get current AI recommendation from Decision Engine.\n\nReturns recommendation only when there's significant occupancy imbalance (>30% difference).\n\nResponse (when recommendation exists):\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"action\": \"MOVE_PASSENGERS\",\n    \"fromCarId\": 4,\n    \"toCarId\": 1,\n    \"confidence\": 0.85,\n    \"reason\": \"Car 4 is 92% full. Car 1 is only 45% full.\"\n  }\n}\n```\n\nResponse (no recommendation):\n```json\n{\n  \"success\": true,\n  \"data\": null\n}\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 - History",
+      "item": [
+        {
+          "name": "GET /api/v1/history - Occupancy History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has records', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('records'); });",
+                  "pm.test('Has summary', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('summary'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/history?hours=24&car_id=4",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "history"],
+              "query": [
+                { "key": "hours", "value": "24", "description": "Hours to look back (1-24, default: 24)" },
+                { "key": "car_id", "value": "4", "description": "Filter by car ID (optional, 1-10)" }
+              ]
+            },
+            "description": "Get historical occupancy data.\n\nQuery params:\n- hours: number of hours to look back (default: 24)\n- car_id: filter by car ID (optional)\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"query\": { \"hours\": 24, \"carId\": 4 },\n    \"records\": [\n      {\n        \"timestamp\": \"2026-07-15T...\",\n        \"carId\": 4,\n        \"occupancy\": 0.72,\n        \"occupancyPct\": 72.0,\n        \"status\": \"HIGH\"\n      }\n    ],\n    \"summary\": {\n      \"averageOccupancy\": 0.65,\n      \"peakOccupancy\": 0.92,\n      \"peakTime\": \"08:30\",\n      \"totalRecords\": 24\n    }\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/history?hours=6 - Recent History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has records', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('records'); });",
+                  "pm.test('Records are limited', () => { const d = pm.response.json(); pm.expect(d.data.records.length).to.be.at.most(6); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/history?hours=6",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "history"],
+              "query": [
+                { "key": "hours", "value": "6", "description": "Hours to look back" }
+              ]
+            },
+            "description": "Get recent history (last 6 hours, no car filter)."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/history/warnings - Warning History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has warnings', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('warnings'); });",
+                  "pm.test('Has total', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('total'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/history/warnings?hours=24",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "history", "warnings"],
+              "query": [
+                { "key": "hours", "value": "24", "description": "Hours to look back (default: 24)" }
+              ]
+            },
+            "description": "Get warning history.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"warnings\": [\n      {\n        \"id\": \"SF10-001-4-HIGH_OCCUPANCY\",\n        \"timestamp\": \"2026-07-15T...\",\n        \"warningType\": \"HIGH_OCCUPANCY\",\n        \"severity\": \"WARNING\",\n        \"carId\": 4,\n        \"message\": \"Car 4 is HIGH (92.0%)\",\n        \"trainId\": \"SF10-001\",\n        \"isActive\": true\n      }\n    ],\n    \"total\": 2,\n    \"hours\": 24,\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 - Configuration",
+      "item": [
+        {
+          "name": "GET /api/v1/config - System Config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has train config', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('train'); });",
+                  "pm.test('Has ai config', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('ai'); });",
+                  "pm.test('Has cameras config', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('cameras'); });",
+                  "pm.test('Total cars is 10', () => { const d = pm.response.json(); pm.expect(d.data.train.totalCars).to.equal(10); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/config",
+            "description": "Get current system configuration.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"train\": {\n      \"formation\": \"SF10\",\n      \"totalCars\": 10,\n      \"capacityPerCar\": 200\n    },\n    \"occupancy\": {\n      \"lowThreshold\": 0.4,\n      \"normalThreshold\": 0.7,\n      \"highThreshold\": 0.9,\n      \"fullThreshold\": 1.0\n    },\n    \"cameras\": [\n      { \"id\": \"car01_cam01\", \"type\": \"cabin\", \"zone\": \"car_1\", \"carMapping\": 1, \"status\": \"online\" },\n      { \"id\": \"car01_cam02\", \"type\": \"cabin\", \"zone\": \"car_1\", \"carMapping\": 1, \"status\": \"online\" },\n      ...\n    ],\n    \"ai\": {\n      \"model\": \"YOLO11s\",\n      \"confidence\": 0.5,\n      \"imageSize\": 640\n    }\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/config/lookup-table - Camera Mapping",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has mappings', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('mappings'); });",
+                  "pm.test('Has 20 camera mappings', () => { const d = pm.response.json(); pm.expect(d.data.mappings.length).to.equal(20); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/config/lookup-table",
+            "description": "Get camera to train car mapping lookup table.\n\nResponse (20 cameras, 2 per car):\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"mappings\": [\n      { \"cameraId\": \"car01_cam01\", \"zone\": \"car_1\", \"carId\": 1 },\n      { \"cameraId\": \"car01_cam02\", \"zone\": \"car_1\", \"carId\": 1 },\n      { \"cameraId\": \"car02_cam01\", \"zone\": \"car_2\", \"carId\": 2 },\n      { \"cameraId\": \"car02_cam02\", \"zone\": \"car_2\", \"carId\": 2 },\n      ...\n      { \"cameraId\": \"car10_cam01\", \"zone\": \"car_10\", \"carId\": 10 },\n      { \"cameraId\": \"car10_cam02\", \"zone\": \"car_10\", \"carId\": 10 }\n    ]\n  }\n}\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 - Simulation",
+      "item": [
+        {
+          "name": "POST /api/v1/simulation/reset - Reset",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has data message', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('message'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/simulation/reset",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Reset simulation to initial state.\n\nClears all train data, warnings, and decisions.\nBroadcasts 'simulation_reset' event via WebSocket.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Simulation reset successfully\",\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/simulation/scenario/empty - Empty Train",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Scenario is empty', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('scenario'); pm.expect(d.data.scenario).to.equal('empty'); });",
+                  "pm.test('Has carsLoaded', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('carsLoaded'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/simulation/scenario/empty",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Load 'empty' scenario - empty train.\n\nResets state and loads empty train configuration.\nBroadcasts occupancy updates for all cars via WebSocket.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"scenario\": \"empty\",\n    \"description\": \"Empty train scenario\",\n    \"carsLoaded\": 10,\n    \"message\": \"Scenario 'empty' loaded\",\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/simulation/scenario/normal - Normal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Scenario is normal', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('scenario'); pm.expect(d.data.scenario).to.equal('normal'); });",
+                  "pm.test('Has carsLoaded', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('carsLoaded'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/simulation/scenario/normal",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Load 'normal' scenario - normal operation.\n\n10 cars with normal occupancy levels (40-70%).\nBroadcasts occupancy updates for all cars via WebSocket.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"scenario\": \"normal\",\n    \"description\": \"Normal operation scenario\",\n    \"carsLoaded\": 10,\n    \"message\": \"Scenario 'normal' loaded\",\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/simulation/scenario/peak_hour - Peak Hour",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Scenario is peak_hour', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('scenario'); pm.expect(d.data.scenario).to.equal('peak_hour'); });",
+                  "pm.test('Has carsLoaded', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('carsLoaded'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/simulation/scenario/peak_hour",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Load 'peak_hour' scenario - rush hour congestion.\n\n10 cars with high occupancy (40-100%). Some cars FULL.\nTriggers warnings and recommendations via WebSocket.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"scenario\": \"peak_hour\",\n    \"description\": \"Rush hour congestion scenario\",\n    \"carsLoaded\": 10,\n    \"message\": \"Scenario 'peak_hour' loaded\",\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/simulation/scenario/holiday - Holiday",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Scenario is holiday', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('scenario'); pm.expect(d.data.scenario).to.equal('holiday'); });",
+                  "pm.test('Has carsLoaded', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('carsLoaded'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/simulation/scenario/holiday",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Load 'holiday' scenario - holiday light traffic.\n\n10 cars with low occupancy (10-27%).\nBroadcasts occupancy updates for all cars via WebSocket.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"scenario\": \"holiday\",\n    \"description\": \"Holiday light traffic scenario\",\n    \"carsLoaded\": 10,\n    \"message\": \"Scenario 'holiday' loaded\",\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/simulation/scenario/invalid - Invalid Scenario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns error', () => { const d = pm.response.json(); pm.expect(d.success).to.be.false; });",
+                  "pm.test('Has error field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('error'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/simulation/scenario/invalid",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Test invalid scenario name.\n\nShould return success: false with error message.\n\nResponse:\n```json\n{\n  \"success\": false,\n  \"error\": \"Invalid scenario. Valid: ['empty', 'normal', 'peak_hour', 'holiday']\"\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/v1/simulation/status - Simulation Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has active field', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('active'); });",
+                  "pm.test('Has uptimeSeconds', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('uptimeSeconds'); });",
+                  "pm.test('Has timestamp', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('timestamp'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/simulation/status",
+            "description": "Get current simulation status.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"active\": true,\n    \"trainsLoaded\": 1,\n    \"activeWarnings\": 2,\n    \"totalDecisions\": 15,\n    \"uptimeSeconds\": 1234.56,\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08 - Frame Upload (YOLO Detection)",
+      "item": [
+        {
+          "name": "POST /api/v1/frame - Upload Frame car01_cam01",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has frame data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('persons_detected'); });",
+                  "pm.test('Has camera_id', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('camera_id'); pm.expect(d.data.camera_id).to.equal('car01_cam01'); });",
+                  "pm.test('Has detection_source is yolo', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('detection_source'); pm.expect(d.data.detection_source).to.equal('yolo'); });",
+                  "pm.test('Has occupancy data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('occupancy'); });",
+                  "pm.test('Has prediction data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('prediction'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/frame?camera_id=car01_cam01&train_id=SF10-001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "frame"],
+              "query": [
+                { "key": "camera_id", "value": "car01_cam01", "description": "Camera identifier (car01_cam01 - car10_cam02)" },
+                { "key": "train_id", "value": "SF10-001", "description": "Train identifier" }
+              ]
+            },
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "Required API key for frame uploads"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "description": "Upload camera frame from Car 1 front camera.\n\nRequired Header: X-API-Key: themis-unity-key-2026\nParams: camera_id=car01_cam01, train_id=SF10-001\nBody: multipart/form-data with 'file' field (JPEG/PNG image)\n\nFull AI Pipeline (YOLO ONLY detection):\n1. Receive JPEG frame\n2. Run YOLO11s detection (person class, conf>=0.5)\n3. Calculate occupancy from YOLO results\n4. Fuse with existing data (FusionEngine)\n5. Predict trend (CALESEngine)\n6. Generate warning (DecisionEngine)\n7. Update State Manager\n8. Broadcast via WebSocket\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"frame_id\": \"frame_1721056800.123\",\n    \"camera_id\": \"car01_cam01\",\n    \"station_id\": \"unknown\",\n    \"train_id\": \"SF10-001\",\n    \"timestamp\": \"2026-07-15T...\",\n    \"status\": \"processed\",\n    \"persons_detected\": 5,\n    \"detection_source\": \"yolo\",\n    \"occupancy\": {\n      \"person_count\": 5,\n      \"capacity\": 200,\n      \"occupancy_percentage\": 2.5,\n      \"status\": \"LOW\",\n      \"risk_score\": 0.1,\n      \"car_id\": 1\n    },\n    \"prediction\": {\n      \"predicted_occupancy\": 3.1,\n      \"risk_score\": 0.1,\n      \"confidence\": 0.7,\n      \"horizon_minutes\": 15\n    },\n    \"recommendation\": null,\n    \"warning\": null\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/frame - Upload Frame car03_cam01",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Has frame data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('persons_detected'); });",
+                  "pm.test('Camera ID is car03_cam01', () => { const d = pm.response.json(); pm.expect(d.data.camera_id).to.equal('car03_cam01'); });",
+                  "pm.test('Detection source is yolo', () => { const d = pm.response.json(); pm.expect(d.data.detection_source).to.equal('yolo'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/frame?camera_id=car03_cam01&train_id=SF10-001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "frame"],
+              "query": [
+                { "key": "camera_id", "value": "car03_cam01", "description": "Car 3 front camera" },
+                { "key": "train_id", "value": "SF10-001", "description": "Train identifier" }
+              ]
+            },
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "Required API key"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "description": "Upload frame from Car 3 front camera.\n\nUse this to test different car detections.\n\nResponse includes YOLO detection results for car 3."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/frame - Upload Frame car10_cam02",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Camera ID is car10_cam02', () => { const d = pm.response.json(); pm.expect(d.data.camera_id).to.equal('car10_cam02'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/frame?camera_id=car10_cam02&train_id=SF10-001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "frame"],
+              "query": [
+                { "key": "camera_id", "value": "car10_cam02", "description": "Car 10 rear camera" },
+                { "key": "train_id", "value": "SF10-001", "description": "Train identifier" }
+              ]
+            },
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "Required API key"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "description": "Upload frame from Car 10 rear camera.\n\nUse this to test the last car detection.\n\nResponse includes YOLO detection results for car 10."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/frame - No API Key (expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Has detail error', () => { const d = pm.response.json(); pm.expect(d).to.have.property('detail'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/frame?camera_id=car01_cam01&train_id=SF10-001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "frame"],
+              "query": [
+                { "key": "camera_id", "value": "car01_cam01" },
+                { "key": "train_id", "value": "SF10-001" }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "description": "Test frame upload WITHOUT API key.\n\nShould return 401 Unauthorized.\n\nResponse:\n```json\n{\n  \"detail\": \"Valid X-API-Key header required for frame uploads.\"\n}\n```"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "09 - WebSocket",
+      "item": [
+        {
+          "name": "WS /ws - Real-time Events",
+          "request": {
+            "method": "GET",
+            "url": "ws://localhost:8000/ws",
+            "description": "WebSocket endpoint for real-time updates.\n\nConnect using WebSocket client (Postman WS tab, wscat, or browser).\n\nEvents received (all data is camelCase):\n\n1. occupancy_updated\n```json\n{\n  \"type\": \"occupancy_updated\",\n  \"trainId\": \"SF10-001\",\n  \"timestamp\": \"2026-07-15T...\",\n  \"data\": {\n    \"car_id\": 1,\n    \"person_count\": 5,\n    \"occupancy_percentage\": 2.5,\n    \"status\": \"LOW\"\n  }\n}\n```\n\n2. prediction_updated\n```json\n{\n  \"type\": \"prediction_updated\",\n  \"data\": {\n    \"car_id\": 1,\n    \"prediction\": {\n      \"predicted_occupancy\": 3.1,\n      \"risk_score\": 0.1,\n      \"confidence\": 0.7\n    }\n  }\n}\n```\n\n3. recommendation_changed\n```json\n{\n  \"type\": \"recommendation_changed\",\n  \"data\": {\n    \"recommendation\": {\n      \"action\": \"MOVE_PASSENGERS\",\n      \"from_car_id\": 4,\n      \"to_car_id\": 1,\n      \"confidence\": 0.85,\n      \"reason\": \"Car 4 is 92% full...\"\n    }\n  }\n}\n```\n\n4. warning_updated\n```json\n{\n  \"type\": \"warning_updated\",\n  \"data\": {\n    \"warning\": {\n      \"train_id\": \"SF10-001\",\n      \"car_id\": 4,\n      \"warning_type\": \"HIGH_OCCUPANCY\",\n      \"severity\": \"WARNING\",\n      \"message\": \"Car 4 is HIGH (92.0%)\",\n      \"is_active\": true\n    }\n  }\n}\n```\n\n5. camera_status_updated\n```json\n{\n  \"type\": \"camera_status_updated\",\n  \"data\": {\n    \"camera_id\": \"car01_cam01\",\n    \"status\": \"active\"\n  }\n}\n```\n\n6. system_health_updated\n7. simulation_reset"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10 - Quick Test Flow",
+      "description": "Run these in order to test the full system flow",
+      "item": [
+        {
+          "name": "Step 1: Check Health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Backend is healthy', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/health",
+            "description": "Step 1: Verify backend is running."
+          },
+          "response": []
+        },
+        {
+          "name": "Step 2: Load Peak Hour Scenario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Scenario loaded', () => { const d = pm.response.json(); pm.expect(d.success).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/simulation/scenario/peak_hour",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Step 2: Load peak hour scenario to generate data."
+          },
+          "response": []
+        },
+        {
+          "name": "Step 3: Check Occupancy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Has car data', () => { const d = pm.response.json(); pm.expect(d.data.cars.length).to.be.greaterThan(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/occupancy",
+            "description": "Step 3: Verify occupancy data loaded from scenario."
+          },
+          "response": []
+        },
+        {
+          "name": "Step 4: Check Recommendation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Has recommendation data', () => { const d = pm.response.json(); pm.expect(d).to.have.property('data'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/recommendation",
+            "description": "Step 4: Check if AI generated a recommendation."
+          },
+          "response": []
+        },
+        {
+          "name": "Step 5: Check Warnings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Has warnings data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('warnings'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/history/warnings",
+            "description": "Step 5: Check if any warnings were generated."
+          },
+          "response": []
+        },
+        {
+          "name": "Step 6: Check System State",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Has system state', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('train'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/state",
+            "description": "Step 6: Verify full system state."
+          },
+          "response": []
+        },
+        {
+          "name": "Step 7: Check Camera Lookup Table",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Has 20 cameras', () => { const d = pm.response.json(); pm.expect(d.data.mappings.length).to.equal(20); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/config/lookup-table",
+            "description": "Step 7: Verify 20 camera mappings."
+          },
+          "response": []
+        },
+        {
+          "name": "Step 8: Reset",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Reset successful', () => { const d = pm.response.json(); pm.expect(d.success).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/simulation/reset",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Step 8: Reset simulation for next test."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -7,11 +7,11 @@ function toCamelCase(str: string): string {
   return str.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
 }
 
-function camelizeKeys(obj: any): any {
+function camelizeKeys(obj: unknown): unknown {
   if (Array.isArray(obj)) return obj.map(camelizeKeys);
   if (obj !== null && typeof obj === "object" && !(obj instanceof Date)) {
     return Object.fromEntries(
-      Object.entries(obj).map(([k, v]) => [toCamelCase(k), camelizeKeys(v)])
+      Object.entries(obj as Record<string, unknown>).map(([k, v]) => [toCamelCase(k), camelizeKeys(v)])
     );
   }
   return obj;
