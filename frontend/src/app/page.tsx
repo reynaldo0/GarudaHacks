@@ -12,6 +12,7 @@ import { SystemHealth } from "@/components/SystemHealth";
 import { apiClient } from "@/lib/api";
 import { useAppStore } from "@/store/useAppStore";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useVoiceRecommendation } from "@/hooks/useVoiceRecommendation";
 import { SystemState, OccupancyCarResponse } from "@/types";
 
 export default function DashboardPage() {
@@ -31,6 +32,7 @@ export default function DashboardPage() {
   const [backendOffline, setBackendOffline] = useState(false);
 
   useWebSocket();
+  useVoiceRecommendation(recommendation);
 
   useEffect(() => {
     async function fetchInitialState() {

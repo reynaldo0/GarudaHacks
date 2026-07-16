@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import { ArrowRight, Camera, TrendingUp, TrendingDown, Minus, Users } from "lucide-react";
 import { Recommendation } from "@/types";
+import { TransferAnimation } from "@/components/TransferAnimation";
 
 interface Prediction {
   trend: string;
@@ -50,8 +51,11 @@ export function TrainOverview({ cars, recommendation }: TrainOverviewProps) {
         </span>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-thin">
-        {cars.map((car) => {
+      <div className="relative">
+        <TransferAnimation recommendation={recommendation ?? null} carCount={cars.length} />
+
+        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-thin">
+          {cars.map((car) => {
           const config = statusConfig[car.status] || statusConfig.NORMAL;
           const isTarget = recommendedToCar === car.carId;
           const isSource = recommendedFromCar === car.carId;
@@ -132,6 +136,7 @@ export function TrainOverview({ cars, recommendation }: TrainOverviewProps) {
             </div>
           );
         })}
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-border">

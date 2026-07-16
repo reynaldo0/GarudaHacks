@@ -41,6 +41,7 @@ export interface Recommendation {
   toCarId: number;
   confidence: number;
   reason: string;
+  passengersToMove?: number;
 }
 
 export interface SystemState {
