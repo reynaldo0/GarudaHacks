@@ -9,28 +9,36 @@ from typing import Dict, Optional
 from loguru import logger
 
 DEFAULT_LOOKUP_TABLE = {
-    # Platform cameras (external view)
-    "platform_01": {"zone": "A", "car_id": 1, "type": "platform"},
-    "platform_02": {"zone": "B", "car_id": 2, "type": "platform"},
-    "platform_03": {"zone": "C", "car_id": 3, "type": "platform"},
-    "platform_04": {"zone": "D", "car_id": 4, "type": "platform"},
-    "platform_05": {"zone": "E", "car_id": 5, "type": "platform"},
-    "platform_06": {"zone": "F", "car_id": 6, "type": "platform"},
-    "platform_07": {"zone": "G", "car_id": 7, "type": "platform"},
-    "platform_08": {"zone": "H", "car_id": 8, "type": "platform"},
-    "platform_09": {"zone": "I", "car_id": 9, "type": "platform"},
-    "platform_10": {"zone": "J", "car_id": 10, "type": "platform"},
-    # Cabin cameras (internal view)
-    "cabin_01": {"zone": "cabin_1", "car_id": 1, "type": "cabin"},
-    "cabin_02": {"zone": "cabin_2", "car_id": 2, "type": "cabin"},
-    "cabin_03": {"zone": "cabin_3", "car_id": 3, "type": "cabin"},
-    "cabin_04": {"zone": "cabin_4", "car_id": 4, "type": "cabin"},
-    "cabin_05": {"zone": "cabin_5", "car_id": 5, "type": "cabin"},
-    "cabin_06": {"zone": "cabin_6", "car_id": 6, "type": "cabin"},
-    "cabin_07": {"zone": "cabin_7", "car_id": 7, "type": "cabin"},
-    "cabin_08": {"zone": "cabin_8", "car_id": 8, "type": "cabin"},
-    "cabin_09": {"zone": "cabin_9", "car_id": 9, "type": "cabin"},
-    "cabin_10": {"zone": "cabin_10", "car_id": 10, "type": "cabin"},
+    # Car 1
+    "car01_cam01": {"zone": "car_1", "car_id": 1, "type": "cabin"},
+    "car01_cam02": {"zone": "car_1", "car_id": 1, "type": "cabin"},
+    # Car 2
+    "car02_cam01": {"zone": "car_2", "car_id": 2, "type": "cabin"},
+    "car02_cam02": {"zone": "car_2", "car_id": 2, "type": "cabin"},
+    # Car 3
+    "car03_cam01": {"zone": "car_3", "car_id": 3, "type": "cabin"},
+    "car03_cam02": {"zone": "car_3", "car_id": 3, "type": "cabin"},
+    # Car 4
+    "car04_cam01": {"zone": "car_4", "car_id": 4, "type": "cabin"},
+    "car04_cam02": {"zone": "car_4", "car_id": 4, "type": "cabin"},
+    # Car 5
+    "car05_cam01": {"zone": "car_5", "car_id": 5, "type": "cabin"},
+    "car05_cam02": {"zone": "car_5", "car_id": 5, "type": "cabin"},
+    # Car 6
+    "car06_cam01": {"zone": "car_6", "car_id": 6, "type": "cabin"},
+    "car06_cam02": {"zone": "car_6", "car_id": 6, "type": "cabin"},
+    # Car 7
+    "car07_cam01": {"zone": "car_7", "car_id": 7, "type": "cabin"},
+    "car07_cam02": {"zone": "car_7", "car_id": 7, "type": "cabin"},
+    # Car 8
+    "car08_cam01": {"zone": "car_8", "car_id": 8, "type": "cabin"},
+    "car08_cam02": {"zone": "car_8", "car_id": 8, "type": "cabin"},
+    # Car 9
+    "car09_cam01": {"zone": "car_9", "car_id": 9, "type": "cabin"},
+    "car09_cam02": {"zone": "car_9", "car_id": 9, "type": "cabin"},
+    # Car 10
+    "car10_cam01": {"zone": "car_10", "car_id": 10, "type": "cabin"},
+    "car10_cam02": {"zone": "car_10", "car_id": 10, "type": "cabin"},
 }
 
 

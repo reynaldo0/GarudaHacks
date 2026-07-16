@@ -40,14 +40,10 @@ class FusionEngine:
             }
 
         elif cabin_occupancy:
-            cabin_occupancy["source"] = "cabin"
-            cabin_occupancy["confidence"] = 0.9
-            return cabin_occupancy
+            return {**cabin_occupancy, "source": "cabin", "confidence": 0.9}
 
         elif platform_occupancy:
-            platform_occupancy["source"] = "platform"
-            platform_occupancy["confidence"] = 0.7
-            return platform_occupancy
+            return {**platform_occupancy, "source": "platform", "confidence": 0.7}
 
         return {
             "person_count": 0,
