@@ -18,6 +18,7 @@ class CarOccupancy(BaseModel):
     occupancy_percentage: float = 0.0
     status: str = "LOW"
     risk_score: float = 0.0
+    camera_id: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 

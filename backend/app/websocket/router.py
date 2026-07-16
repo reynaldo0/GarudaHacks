@@ -33,8 +33,9 @@ class ConnectionManager:
 
     async def broadcast(self, message: Dict[str, Any]):
         """Broadcast message to all connected clients."""
+        snapshot = list(self.active_connections)
         disconnected = []
-        for connection in self.active_connections:
+        for connection in snapshot:
             try:
                 await connection.send_json(message)
             except Exception:
@@ -42,7 +43,8 @@ class ConnectionManager:
 
         # Remove disconnected clients
         for conn in disconnected:
-            self.active_connections.remove(conn)
+            if conn in self.active_connections:
+                self.active_connections.remove(conn)
 
 
 # Global connection manager
