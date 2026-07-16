@@ -42,6 +42,9 @@ export interface Recommendation {
   confidence: number;
   reason: string;
   passengersToMove?: number;
+  priority?: number;
+  isWomenPriority?: boolean;
+  womenAlternative?: Recommendation;
 }
 
 export interface SystemState {

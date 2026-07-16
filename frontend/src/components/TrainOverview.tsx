@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { ArrowRight, Camera, TrendingUp, TrendingDown, Minus, Users } from "lucide-react";
+import { ArrowRight, Camera, TrendingUp, TrendingDown, Minus, Users, VenusIcon as Female } from "lucide-react";
 import { Recommendation } from "@/types";
 import { TransferAnimation } from "@/components/TransferAnimation";
 
@@ -27,6 +27,8 @@ interface TrainOverviewProps {
   recommendation?: Recommendation | null;
 }
 
+const WOMEN_CARS = [1, 10];
+
 const statusConfig: Record<string, { bg: string; text: string; ring: string; label: string }> = {
   LOW: { bg: "from-green-500 to-emerald-600", text: "text-green-600", ring: "ring-green-200", label: "Low" },
   NORMAL: { bg: "from-emerald-400 to-green-500", text: "text-emerald-600", ring: "ring-emerald-200", label: "Normal" },
@@ -38,6 +40,7 @@ const statusConfig: Record<string, { bg: string; text: string; ring: string; lab
 export function TrainOverview({ cars, recommendation }: TrainOverviewProps) {
   const recommendedToCar = recommendation?.toCarId;
   const recommendedFromCar = recommendation?.fromCarId;
+  const showWomenAnim = recommendation?.priority === 2 || recommendation?.womenAlternative?.isWomenPriority;
 
   return (
     <div className="glass rounded-2xl p-6 animate-fade-in">
@@ -46,25 +49,35 @@ export function TrainOverview({ cars, recommendation }: TrainOverviewProps) {
           <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
           Train Overview &mdash; SF10
         </h3>
-        <span className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">
-          {cars.length} cars
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">
+            {cars.length} cars
+          </span>
+          <span className="text-[10px] text-pink-600 bg-pink-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <Female className="w-3 h-3" /> Car 1 & Car 10 (Women)
+          </span>
+        </div>
       </div>
 
       <div className="relative">
-        <TransferAnimation recommendation={recommendation ?? null} carCount={cars.length} />
+        <TransferAnimation recommendation={recommendation ?? null} carCount={cars.length} showWomenAlternative={showWomenAnim} />
 
-        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-thin">
+        <div className="flex gap-3 pb-4 justify-center">
           {cars.map((car) => {
           const config = statusConfig[car.status] || statusConfig.NORMAL;
           const isTarget = recommendedToCar === car.carId;
           const isSource = recommendedFromCar === car.carId;
           const fillHeight = Math.min(car.occupancyPct, 100);
+          const isWomenCar = WOMEN_CARS.includes(car.carId);
 
           return (
             <div
               key={car.carId}
-              className="flex-shrink-0 w-28 flex flex-col items-center group"
+              className={clsx(
+                "flex-1 min-w-0 max-w-[120px] flex flex-col items-center group",
+                isWomenCar && "order-first"
+              )}
+              style={isWomenCar ? {} : car.carId === 10 ? {} : undefined}
             >
               <div className="h-6 mb-1 flex items-center">
                 {isTarget && (
@@ -82,21 +95,31 @@ export function TrainOverview({ cars, recommendation }: TrainOverviewProps) {
 
               <div
                 className={clsx(
-                  "relative w-24 h-32 rounded-xl flex flex-col items-center justify-center border transition-all duration-300",
+                  "relative w-full aspect-[3/4] rounded-xl flex flex-col items-center justify-center border transition-all duration-300",
                   "hover:scale-105 hover:shadow-lg",
                   isTarget && "ring-2 ring-green-400/50 shadow-lg shadow-green-200",
                   isSource && "ring-2 ring-red-400/50 shadow-lg shadow-red-200",
-                  !isTarget && !isSource && "border-border bg-surface"
+                  isWomenCar && !isTarget && !isSource && "border-pink-200 ring-1 ring-pink-100",
+                  !isTarget && !isSource && !isWomenCar && "border-border bg-surface"
                 )}
               >
                 <div
-                  className={clsx("absolute bottom-0 left-0 right-0 rounded-b-xl bg-gradient-to-t opacity-20 transition-all duration-500", config.bg)}
-                  style={{ height: `${fillHeight}%` }}
+                  className="absolute bottom-0 left-0 right-0 rounded-b-xl opacity-20 transition-all duration-500"
+                  style={{
+                    height: `${fillHeight}%`,
+                    background: `linear-gradient(to top, ${isWomenCar ? "#EC4899" : config.bg.includes("green") ? "#22C55E" : config.bg.includes("amber") ? "#F59E0B" : config.bg.includes("orange") ? "#F97316" : config.bg.includes("red") ? "#EF4444" : "#6366F1"}, transparent)`,
+                  }}
                 />
                 <div className="absolute inset-0 rounded-xl border border-border" />
 
+                {isWomenCar && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-pink-100 flex items-center justify-center ring-2 ring-white">
+                    <Female className="w-3 h-3 text-pink-600" />
+                  </div>
+                )}
+
                 <span className="relative text-2xl font-bold text-foreground">{car.carId}</span>
-                <span className="relative text-sm text-muted-foreground font-medium">{car.occupancyPct.toFixed(0)}%</span>
+                <span className={clsx("relative text-sm font-medium", isWomenCar ? "text-pink-600" : "text-muted-foreground")}>{car.occupancyPct.toFixed(0)}%</span>
                 <div className="relative flex items-center gap-1 mt-1">
                   <Users className="w-3 h-3 text-muted-foreground" />
                   <span className="text-[11px] text-muted-foreground">{car.passengers}</span>
@@ -146,6 +169,10 @@ export function TrainOverview({ cars, recommendation }: TrainOverviewProps) {
             <span className="text-xs text-muted-foreground">{cfg.label}</span>
           </div>
         ))}
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded bg-gradient-to-br from-pink-400 to-pink-600" />
+          <span className="text-xs text-muted-foreground">Women Car</span>
+        </div>
       </div>
     </div>
   );
