@@ -9,7 +9,7 @@ from fastapi import APIRouter
 from datetime import datetime
 from app.core.state_manager import state_manager
 from app.core.integration_hub import integration_hub
-from app.simulation.seeder import SCENARIOS, load_scenario
+from app.simulation.seeder import SCENARIOS, load_scenario, broadcast_full_state
 
 router = APIRouter()
 
@@ -30,7 +30,7 @@ async def reset_simulation():
 
 @router.post("/simulation/scenario/{scenario_name}")
 async def load_scenario_endpoint(scenario_name: str):
-    """Load a predefined simulation scenario."""
+    """Load a predefined simulation scenario with full state broadcast."""
     if scenario_name not in SCENARIOS:
         return {
             "success": False,
@@ -41,22 +41,8 @@ async def load_scenario_endpoint(scenario_name: str):
     if not scenario:
         return {"success": False, "error": "Scenario load failed"}
 
-    # Broadcast the freshly loaded state to all clients.
-    train_state = state_manager.get_train_state("SF10-001")
-    if train_state:
-        for car in train_state.cars:
-            await integration_hub.broadcast_occupancy_updated(
-                car_id=car.car_id,
-                occupancy_data={
-                    "car_id": car.car_id,
-                    "occupancy_percentage": car.occupancy_percentage,
-                    "person_count": car.detected_persons,
-                    "capacity": car.capacity,
-                    "status": car.status,
-                    "risk_score": car.risk_score,
-                },
-                train_id="SF10-001",
-            )
+    # Broadcast full state (occupancy + predictions + warnings + cameras)
+    await broadcast_full_state("SF10-001")
 
     return {
         "success": True,

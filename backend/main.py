@@ -80,6 +80,15 @@ async def lifespan(app: FastAPI):
     state_manager._system_start_time = time.time()
     print("[OK] State Manager initialized")
 
+    # Auto-seed default scenario
+    print("[INFO] Seeding default occupancy data...")
+    from app.simulation.seeder import seed_default
+    try:
+        await seed_default()
+        print("[OK] Default scenario seeded")
+    except Exception as e:
+        print(f"[WARN] Seeding failed: {e}")
+
     print()
     print("[OK] PROJECT THEMIS is ready!")
     print()
