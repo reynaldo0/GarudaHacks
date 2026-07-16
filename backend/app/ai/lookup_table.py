@@ -8,6 +8,8 @@ Camera to train car mapping configuration.
 from typing import Dict, Optional
 from loguru import logger
 
+
+# Default camera to car mapping for SF10 formation (20 cameras, 2 per car)
 DEFAULT_LOOKUP_TABLE = {
     # Car 1
     "car01_cam01": {"zone": "car_1", "car_id": 1, "type": "cabin"},
