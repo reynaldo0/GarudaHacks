@@ -1,3 +1,10 @@
+"""
+PROJECT THEMIS - Occupancy Endpoint
+Version: 5.0
+
+This endpoint provides occupancy information.
+"""
+
 from fastapi import APIRouter
 from datetime import datetime
 from app.core.state_manager import state_manager
@@ -16,7 +23,7 @@ async def get_occupancy():
         return {
             "success": True,
             "data": {
-                "train_id": "SF10",
+                "trainId": "SF10",
                 "station": "Manggarai",
                 "timestamp": datetime.utcnow().isoformat(),
                 "cars": [],
@@ -27,16 +34,19 @@ async def get_occupancy():
     return {
         "success": True,
         "data": {
-            "train_id": train.train_id,
+            "trainId": train.train_id,
             "station": "Manggarai",
             "timestamp": train.timestamp.isoformat(),
             "cars": [
                 {
-                    "car_id": car.car_id,
-                    "occupancy": car.occupancy_percentage / 100,
+                    "carId": car.car_id,
+                    "occupancyPct": car.occupancy_percentage,
                     "status": car.status,
                     "passengers": car.detected_persons,
                     "capacity": car.capacity,
+                    "cameraStatus": "active" if car.camera_id else "inactive",
+                    "cameraId": car.camera_id,
+                    "riskScore": car.risk_score,
                 }
                 for car in train.cars
             ],
@@ -54,12 +64,12 @@ async def get_car_occupancy(car_id: int):
                 return {
                     "success": True,
                     "data": {
-                        "car_id": car.car_id,
-                        "occupancy": car.occupancy_percentage / 100,
+                        "carId": car.car_id,
+                        "occupancyPct": car.occupancy_percentage,
                         "status": car.status,
                         "passengers": car.detected_persons,
                         "capacity": car.capacity,
-                        "risk_score": car.risk_score,
+                        "riskScore": car.risk_score,
                         "timestamp": car.timestamp.isoformat(),
                     },
                 }

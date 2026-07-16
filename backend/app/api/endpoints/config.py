@@ -1,3 +1,10 @@
+"""
+PROJECT THEMIS - Configuration Endpoint
+Version: 5.0
+
+This endpoint provides system configuration.
+"""
+
 from fastapi import APIRouter
 
 router = APIRouter()
@@ -13,35 +20,35 @@ async def get_config():
         "data": {
             "train": {
                 "formation": "SF10",
-                "total_cars": 10,
-                "capacity_per_car": 200,
+                "totalCars": 10,
+                "capacityPerCar": 200,
             },
             "occupancy": {
-                "low_threshold": 0.4,
-                "normal_threshold": 0.7,
-                "high_threshold": 0.9,
-                "full_threshold": 1.0,
+                "lowThreshold": 0.4,
+                "normalThreshold": 0.7,
+                "highThreshold": 0.9,
+                "fullThreshold": 1.0,
             },
             "cameras": [
                 {
                     "id": "platform_01",
                     "type": "platform",
                     "zone": "A",
-                    "car_mapping": 1,
+                    "carMapping": 1,
                     "status": "online",
                 },
                 {
                     "id": "cabin_04",
                     "type": "cabin",
                     "zone": "cabin_4",
-                    "car_mapping": 4,
+                    "carMapping": 4,
                     "status": "online",
                 },
             ],
             "ai": {
                 "model": "YOLO11s",
                 "confidence": 0.5,
-                "image_size": 640,
+                "imageSize": 640,
             },
         },
     }
@@ -54,11 +61,11 @@ async def get_lookup_table():
         "success": True,
         "data": {
             "mappings": [
-                {"camera_id": "platform_01", "zone": "A", "car_id": 1},
-                {"camera_id": "platform_02", "zone": "B", "car_id": 2},
-                {"camera_id": "platform_03", "zone": "C", "car_id": 3},
-                {"camera_id": "cabin_04", "zone": "cabin_4", "car_id": 4},
-                {"camera_id": "cabin_05", "zone": "cabin_5", "car_id": 5},
+                {"cameraId": "platform_01", "zone": "A", "carId": 1},
+                {"cameraId": "platform_02", "zone": "B", "carId": 2},
+                {"cameraId": "platform_03", "zone": "C", "carId": 3},
+                {"cameraId": "cabin_04", "zone": "cabin_4", "carId": 4},
+                {"cameraId": "cabin_05", "zone": "cabin_5", "carId": 5},
             ],
         },
     }

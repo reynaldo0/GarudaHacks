@@ -7,7 +7,7 @@ This module aggregates all API routers.
 
 from fastapi import APIRouter
 
-from app.api.endpoints import health, frame, occupancy, state, history, config, simulation
+from app.api.endpoints import health, frame, occupancy, state, history, config, simulation, recommendation
 
 api_router = APIRouter()
 
@@ -19,3 +19,4 @@ api_router.include_router(state.router, tags=["State"])
 api_router.include_router(history.router, tags=["History"])
 api_router.include_router(config.router, tags=["Configuration"])
 api_router.include_router(simulation.router, tags=["Simulation"])
+api_router.include_router(recommendation.router, tags=["Recommendation"])

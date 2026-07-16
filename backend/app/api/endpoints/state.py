@@ -1,3 +1,10 @@
+"""
+PROJECT THEMIS - State Endpoint
+Version: 5.0
+
+This endpoint provides current system state.
+"""
+
 from fastapi import APIRouter
 from datetime import datetime
 from app.core.state_manager import state_manager
@@ -26,9 +33,9 @@ async def get_state():
             "id": train.train_id,
             "formation": train.formation,
             "capacity": 200,
-            "total_cars": train.total_cars,
-            "total_passengers": total_passengers,
-            "total_capacity": total_capacity,
+            "totalCars": train.total_cars,
+            "totalPassengers": total_passengers,
+            "totalCapacity": total_capacity,
             "percentage": round(pct, 2),
             "status": state_manager._calculate_status(pct),
         }
@@ -37,11 +44,14 @@ async def get_state():
     if warnings:
         w = warnings[-1]
         warning_data = {
-            "active": True,
-            "type": w.warning_type,
+            "id": f"{w.train_id}-{w.car_id}-{w.warning_type}",
+            "isActive": True,
+            "warningType": w.warning_type,
             "severity": w.severity,
-            "car_id": w.car_id,
+            "carId": w.car_id,
+            "trainId": w.train_id,
             "message": w.message,
+            "timestamp": w.timestamp.isoformat() if w.timestamp else datetime.utcnow().isoformat(),
         }
 
     return {
@@ -56,8 +66,8 @@ async def get_state():
                 "total_cars": 10,
             },
             "occupancy": train_data or {
-                "total_passengers": 0,
-                "total_capacity": 2000,
+                "totalPassengers": 0,
+                "totalCapacity": 2000,
                 "percentage": 0,
                 "status": "UNKNOWN",
             },
