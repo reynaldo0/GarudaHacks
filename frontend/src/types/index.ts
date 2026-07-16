@@ -83,14 +83,19 @@ export interface SystemHealthItem {
 }
 
 export interface OccupancyCarResponse {
-  car_id: number;
-  occupancy_percentage?: number;
-  occupancy?: number;
+  carId: number;
+  occupancyPct: number;
   status: string;
-  person_count?: number;
-  passengers?: number;
-  capacity?: number;
-  prediction?: Record<string, unknown> | null;
-  camera_status?: string;
+  passengers: number;
+  capacity: number;
+  prediction?: {
+    trend: string;
+    predictedOccupancy: number;
+    confidence: number;
+    horizonMinutes?: number;
+  } | null;
+  cameraStatus?: string;
+  cameraId?: string;
+  riskScore?: number;
   recommendation?: Record<string, unknown> | null;
 }

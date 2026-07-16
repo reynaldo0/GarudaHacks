@@ -20,13 +20,13 @@ export default function TrainPage() {
         if (data?.cars) {
           setCars(
             data.cars.map((c: OccupancyCarResponse) => ({
-              carId: c.car_id,
-              occupancyPct: c.occupancy_percentage || (c.occupancy ?? 0) * 100,
+              carId: c.carId,
+              occupancyPct: c.occupancyPct,
               status: c.status,
-              passengers: c.person_count || c.passengers || 0,
-              capacity: c.capacity || 200,
+              passengers: c.passengers,
+              capacity: c.capacity,
               prediction: c.prediction || null,
-              cameraStatus: c.camera_status || "active",
+              cameraStatus: c.cameraStatus || "active",
               recommendation: c.recommendation || null,
             }))
           );

@@ -6,16 +6,17 @@ import { apiClient } from "@/lib/api";
 
 interface HistoryRecord {
   timestamp: string;
-  car_id: number;
+  carId: number;
   occupancy: number;
+  occupancyPercentage: number;
   status: string;
 }
 
 interface HistorySummary {
-  average_occupancy: number;
-  peak_occupancy: number;
-  peak_time: string;
-  total_records: number;
+  averageOccupancy: number;
+  peakOccupancy: number;
+  peakTime: string;
+  totalRecords: number;
 }
 
 export default function HistoryPage() {
@@ -101,9 +102,9 @@ export default function HistoryPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          { label: "Average Occupancy", value: summary ? `${(summary.average_occupancy * 100).toFixed(0)}%` : "--", color: "text-foreground" },
-          { label: "Peak Occupancy", value: summary ? `${(summary.peak_occupancy * 100).toFixed(0)}%` : "--", color: "text-secondary" },
-          { label: "Peak Time", value: summary?.peak_time || "--", color: "text-foreground" },
+          { label: "Average Occupancy", value: summary ? `${(summary.averageOccupancy * 100).toFixed(0)}%` : "--", color: "text-foreground" },
+          { label: "Peak Occupancy", value: summary ? `${(summary.peakOccupancy * 100).toFixed(0)}%` : "--", color: "text-secondary" },
+          { label: "Peak Time", value: summary?.peakTime || "--", color: "text-foreground" },
           { label: "Total Records", value: String(records.length), color: "text-foreground" },
         ].map((card, i) => (
           <div key={i} className="glass glass-hover rounded-2xl p-6 animate-fade-in" style={{ animationDelay: `${i * 50}ms` }}>
@@ -143,7 +144,7 @@ export default function HistoryPage() {
                       <td className="p-4 text-sm text-foreground">
                         {new Date(record.timestamp).toLocaleTimeString()}
                       </td>
-                      <td className="p-4 text-sm text-foreground font-medium">Car {record.car_id}</td>
+                      <td className="p-4 text-sm text-foreground font-medium">Car {record.carId}</td>
                       <td className="p-4 text-sm">
                         <div className="flex items-center gap-2">
                           <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
