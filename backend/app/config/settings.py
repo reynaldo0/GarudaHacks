@@ -1,3 +1,11 @@
+"""
+PROJECT THEMIS - Settings Configuration
+Version: 5.0
+
+This module loads all configuration from .env file
+and provides them as a single Settings object.
+"""
+
 import json
 from pathlib import Path
 from typing import List
@@ -5,29 +13,36 @@ from typing import List
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
+
 class Settings(BaseSettings):
     """
     Application settings loaded from .env file.
     """
 
+    # --- Application ---
     APP_NAME: str = "PROJECT THEMIS"
     APP_VERSION: str = "5.0.0"
     APP_ENV: str = "development"
     APP_DEBUG: bool = True
 
+    # --- Server ---
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     WORKERS: int = 1
 
+    # --- Database ---
     DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/themis"
 
+    # --- AI Model ---
     MODEL_PATH: str = "weights/yolo11s.pt"
     MODEL_CONFIDENCE: float = 0.5
     MODEL_IMAGE_SIZE: int = 640
 
+    # --- YOLO Detection ---
     YOLO_CLASSES: str = "0"
     PERSON_CLASS_ID: int = 0
 
+    # --- Occupancy Thresholds ---
     OCCUPANCY_LOW_THRESHOLD: float = 0.4
     OCCUPANCY_NORMAL_THRESHOLD: float = 0.7
     OCCUPANCY_HIGH_THRESHOLD: float = 0.9
@@ -53,6 +68,11 @@ class Settings(BaseSettings):
     # --- CORS ---
     CORS_ORIGINS: str = '["http://localhost:3000","http://localhost:5173"]'
 
+    # --- Auth & Security ---
+    JWT_SECRET: str = "themis-dev-secret-change-me"
+    # Shared API key for Unity Digital Twin (machine-to-machine) frame uploads.
+    API_KEY: str = "themis-unity-key-2026"
+
     @property
     def cors_origins_list(self) -> List[str]:
         """Parse CORS_ORIGINS string to list."""
@@ -75,4 +95,5 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 
+# Create global settings instance
 settings = Settings()
