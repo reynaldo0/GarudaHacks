@@ -1,26 +1,22 @@
 """
 PROJECT THEMIS - Frame Endpoint
-Version: 7.0
+Version: 6.0
 
-This endpoint handles frame upload from Unity Camera or other sources.
-Full AI pipeline: YOLO -> Occupancy -> Fusion -> CALES -> Decision -> State
-Async-safe: YOLO runs in thread pool via asyncio.to_thread.
-
-YOLO IS THE ONLY DETECTION SOURCE. No Unity fallback.
+This endpoint handles frame upload from Unity 4 ceiling fisheye cameras.
+Full AI pipeline: Spatial Segmentation -> Occupancy Grid -> Fusion -> CALES -> Decision -> State
 """
 
 import asyncio
 import time
-from fastapi import APIRouter, UploadFile, File, HTTPException, Header, Depends
+from fastapi import APIRouter, UploadFile, File, HTTPException, Header, Depends, Form
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from app.core.state_manager import state_manager
 from app.core.integration_hub import integration_hub
 from app.core.security import verify_api_key
 
 router = APIRouter()
 
-# Semaphore to limit concurrent frame processing (prevents YOLO overload)
 _frame_semaphore = asyncio.Semaphore(5)
 
 
@@ -38,189 +34,207 @@ async def verify_api_key_header(
 
 @router.post("/frame")
 async def receive_frame(
-    file: UploadFile = File(...),
-    camera_id: str = "default",
-    station_id: str = "unknown",
-    train_id: str = "SF10-001",
+    files: List[UploadFile] = File(...),
+    camera_ids: Optional[str] = Form(default=None),
+    station_id: str = Form(default="unknown"),
+    train_id: str = Form(default="SF10-001"),
     _auth=Depends(verify_api_key_header),
 ):
     """
-    Receive frame from camera source.
+    Receive frames from 4 ceiling fisheye cameras per car.
 
-    YOLO is the SOLE detection source. Pipeline:
-    1. Receive JPEG frame
-    2. Run YOLO detection in thread pool (non-blocking)
-    3. Calculate occupancy from YOLO results
-    4. Fuse with existing data (FusionEngine)
-    5. Predict trend (CALESEngine)
-    6. Generate warning (DecisionEngine)
-    7. Update State Manager
-    8. Broadcast via WebSocket
+    Pipeline:
+    1. Receive 4 JPEG/PNG frames
+    2. Fisheye undistortion
+    3. Spatial Occupancy Segmentation
+    4. Occupancy Grid Generation
+    5. Fusion (4 grids -> 1 car map)
+    6. Density Classification
+    7. CALES (Bogie Health)
+    8. Redistribution Analysis
+    9. Door Logic
+    10. Announcement Generation
+    11. PipelineState Construction
+    12. WebSocket Broadcast
     """
-    if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Invalid file type. Expected image.")
+    if len(files) == 0:
+        raise HTTPException(status_code=400, detail="No files uploaded.")
 
-    frame_data = await file.read()
+    frames_data = []
+    for file in files:
+        if not file.content_type or not file.content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail=f"Invalid file type: {file.content_type}")
+        data = await file.read()
+        if len(data) == 0:
+            raise HTTPException(status_code=400, detail="Empty frame.")
+        frames_data.append(data)
 
-    if len(frame_data) == 0:
-        raise HTTPException(status_code=400, detail="Empty frame.")
+    # Parse camera IDs
+    cam_ids = []
+    if camera_ids:
+        cam_ids = [c.strip() for c in camera_ids.split(",")]
+    while len(cam_ids) < len(files):
+        cam_ids.append(f"cam{len(cam_ids)+1:02d}")
 
-    # Run YOLO + AI pipeline in thread pool (does not block event loop)
     async with _frame_semaphore:
         result = await asyncio.to_thread(
-            _process_frame, frame_data, camera_id, train_id
+            _process_frames, frames_data, cam_ids, train_id, station_id
         )
 
-    # Broadcast results via WebSocket (async, fast)
-    await _broadcast_results(result, camera_id, train_id)
+    await _broadcast_pipeline_state(result, train_id)
 
     return result
 
 
-def _process_frame(
-    frame_data: bytes,
-    camera_id: str,
+def _process_frames(
+    frames_data: List[bytes],
+    camera_ids: List[str],
     train_id: str,
+    station_id: str,
 ) -> dict:
     """
     Synchronous frame processing (runs in thread pool).
-    YOLO IS THE ONLY DETECTION SOURCE. No fallback to Unity.
-    Pipeline: YOLO -> Occupancy -> Fusion -> CALES -> Decision -> State
+    Pipeline: Spatial Segmentation -> Occupancy Grid -> Fusion -> CALES -> Decision -> State
     """
     import main
-    yolo = main.yolo_engine
+    spatial = main.spatial_engine
     occupancy = main.occupancy_engine
     lookup = main.lookup_table
     fusion = main.fusion_engine
     cales = main.cales_engine
     decision = main.decision_engine
+    redistribution = main.redistribution_engine
+    door = main.door_engine
+    announcement = main.announcement_engine
 
-    persons_detected = 0
-    occupancy_data = None
-    warning = None
-    prediction = None
-    recommendation = None
+    # Get car ID from first camera
+    car_id = lookup.get_car_id(camera_ids[0]) or 1
 
-    if yolo and yolo.is_loaded:
-        import numpy as np
-        import cv2
-        nparr = np.frombuffer(frame_data, np.uint8)
-        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    # 1. Preprocess all frames (fisheye undistortion + resize)
+    from app.ai.video_adapter import VideoAdapter
+    adapter = VideoAdapter()
 
-        if frame is not None:
-            # 1. YOLO detection - THE ONLY SOURCE
-            detections = yolo.detect(frame)
-            persons_detected = len(detections)
+    camera_results = []
+    for frame_data, cam_id in zip(frames_data, camera_ids):
+        frame = adapter.decode_frame(frame_data)
+        if frame is None:
+            continue
 
-            # 2. Get car ID from lookup table
-            car_id = lookup.get_car_id(camera_id) or 1
-            camera_type = lookup.get_camera_type(camera_id) or "cabin"
+        # Fisheye undistortion
+        frame = adapter.undistort_fisheye(frame)
 
-            # 3. Calculate occupancy from YOLO result
-            raw_occupancy = occupancy.calculate(persons_detected, capacity=200)
-            raw_occupancy["car_id"] = car_id
+        # Resize
+        frame = adapter.preprocess(frame, (640, 640))
 
-            # 4. Fusion - merge with existing state
-            existing_car = None
-            train_state = state_manager.get_train_state(train_id)
-            if train_state:
-                for c in train_state.cars:
-                    if c.car_id == car_id:
-                        existing_car = {
-                            "person_count": c.detected_persons,
-                            "capacity": c.capacity,
-                            "occupancy_percentage": c.occupancy_percentage,
-                        }
-                        break
+        # 2. Spatial Occupancy Segmentation
+        result = spatial.predict(frame)
+        camera_results.append(result)
 
-            fused = fusion.fuse(
-                platform_occupancy=raw_occupancy if camera_type == "platform" else existing_car,
-                cabin_occupancy=raw_occupancy if camera_type == "cabin" else existing_car,
-            )
-            fused["car_id"] = car_id
+    # 3. Fusion - merge 4 occupancy grids
+    fused = fusion.fuse(camera_results)
 
-            # 5. CALES - predict and add snapshot
-            cales.add_snapshot(car_id, fused.get("occupancy_percentage", 0), persons_detected)
-            prediction = cales.predict(car_id)
+    # 4. Calculate occupancy metrics
+    occ_metrics = occupancy.calculate(
+        spatial_occupancy_score=fused.get("spatial_occupancy_score", 0),
+        free_space_ratio=fused.get("free_space_ratio", 1.0),
+    )
 
-            # 6. Decision - generate warning
-            occupancy_data = occupancy.calculate(fused.get("person_count", persons_detected), capacity=200)
-            occupancy_data["car_id"] = car_id
-            if decision:
-                warning = decision.evaluate(occupancy_data, train_id)
+    # 5. Density classification
+    from app.ai.density_classifier import DensityClassifier
+    classifier = DensityClassifier()
+    density_result = classifier.classify(fused)
 
-            # 7. Update State Manager
-            state_manager.update_car_occupancy(
-                train_id=train_id,
-                car_id=car_id,
-                detected_persons=fused.get("person_count", persons_detected),
-                capacity=200,
-                camera_id=camera_id,
-            )
+    # 6. CALES - Bogie Health
+    cales.add_snapshot(
+        car_id,
+        fused.get("spatial_occupancy_score", 0),
+        occ_metrics.get("occupancy_ratio", 0),
+    )
 
-            # 8. Generate recommendation from CALES
-            train_state = state_manager.get_train_state(train_id)
-            if train_state and cales:
-                recommendation = cales.generate_recommendation(
-                    [{"car_id": c.car_id, "occupancy_percentage": c.occupancy_percentage} for c in train_state.cars]
-                )
-    else:
-        # YOLO not loaded - cannot detect. Return 0.
-        print(f"[Frame] WARNING: YOLO not loaded, cannot detect persons for {camera_id}")
+    # Get all car data for CALES calculation
+    all_car_data = _get_all_car_data(train_id)
+    cales_result = cales.calculate_cales_score(car_id, all_car_data)
+
+    # 7. Redistribution Analysis
+    redistribution_result = redistribution.analyze(
+        all_car_data + [{"car_id": car_id, **occ_metrics}],
+        current_car_id=car_id,
+    )
+
+    # 8. Door Logic
+    door_result = door.evaluate(
+        car_id,
+        density_result.get("density_indicator", "GREEN"),
+        redistribution_result,
+    )
+
+    # 9. Announcement
+    announcement_result = announcement.generate(redistribution_result, car_id)
+
+    # 10. Warning
+    warning = decision.evaluate(
+        {"car_id": car_id, **occ_metrics, "density_indicator": density_result.get("density_indicator")},
+        train_id,
+    )
+
+    # 11. Update State Manager
+    state_manager.update_car_spatial_occupancy(
+        train_id=train_id,
+        car_id=car_id,
+        occupancy_ratio=occ_metrics.get("occupancy_ratio", 0),
+        free_space_ratio=occ_metrics.get("free_space_ratio", 1),
+        spatial_occupancy_score=fused.get("spatial_occupancy_score", 0),
+        density_indicator=density_result.get("density_indicator", "GREEN"),
+        camera_id=camera_ids[0] if camera_ids else None,
+    )
+
+    # 12. Build PipelineState
+    pipeline_state = {
+        "car_id": f"car_{car_id:02d}",
+        "occupancy_ratio": occ_metrics.get("occupancy_ratio", 0),
+        "free_space_ratio": occ_metrics.get("free_space_ratio", 1),
+        "density_indicator": density_result.get("density_indicator", "GREEN"),
+        "spatial_occupancy_score": fused.get("spatial_occupancy_score", 0),
+        "recommended_target": redistribution_result.get("to_car_id") if redistribution_result else None,
+        "door_action": door_result.get("door_action", "CLOSE"),
+        "announcement": announcement_result.get("text") if announcement_result else None,
+        "cales_score": cales_result.get("cales_score", 0),
+        "health_index": cales_result.get("health_index", 100),
+        "damage_multiplier": cales_result.get("damage_multiplier", 1.0),
+        "inspection_priority": 0,
+        "recommended_action": "CONTINUE_MONITORING",
+        "timestamp": datetime.utcnow().isoformat(),
+    }
 
     return {
         "success": True,
-        "data": {
-            "frame_id": f"frame_{time.time()}",
-            "camera_id": camera_id,
-            "station_id": station_id,
-            "train_id": train_id,
-            "timestamp": datetime.utcnow().isoformat(),
-            "status": "processed",
-            "persons_detected": persons_detected,
-            "detection_source": "yolo",
-            "occupancy": occupancy_data,
-            "prediction": prediction,
-            "recommendation": recommendation,
-            "warning": warning.model_dump() if warning else None,
-        },
+        "data": pipeline_state,
     }
 
 
-async def _broadcast_results(result: dict, camera_id: str, train_id: str):
-    """Broadcast frame processing results via WebSocket."""
+def _get_all_car_data(train_id: str) -> list:
+    """Get all car data from state manager."""
+    train_state = state_manager.get_train_state(train_id)
+    if not train_state:
+        return []
+
+    return [
+        {
+            "car_id": c.car_id,
+            "occupancy_ratio": getattr(c, 'occupancy_ratio', 0),
+            "spatial_occupancy_score": getattr(c, 'spatial_occupancy_score', 0),
+            "density_indicator": getattr(c, 'density_indicator', 'GREEN'),
+        }
+        for c in train_state.cars
+    ]
+
+
+async def _broadcast_pipeline_state(result: dict, train_id: str):
+    """Broadcast pipeline state via WebSocket."""
     try:
         data = result.get("data", {})
-
-        if data.get("occupancy"):
-            await integration_hub.broadcast_occupancy_updated(
-                car_id=data["occupancy"].get("car_id", 1),
-                occupancy_data=data["occupancy"],
-                train_id=train_id,
-            )
-
-        if data.get("prediction"):
-            await integration_hub.broadcast_prediction_updated(
-                car_id=data["occupancy"].get("car_id", 1) if data.get("occupancy") else 1,
-                prediction=data["prediction"],
-                train_id=train_id,
-            )
-
-        if data.get("recommendation"):
-            await integration_hub.broadcast_recommendation_changed(
-                recommendation=data["recommendation"],
-                train_id=train_id,
-            )
-
-        if data.get("warning"):
-            await integration_hub.broadcast_warning_updated(
-                warning=data["warning"],
-                train_id=train_id,
-            )
-
-        await integration_hub.broadcast_camera_status_updated(
-            camera_id=camera_id,
-            status="active",
+        await integration_hub.broadcast_pipeline_state_updated(
+            pipeline_state=data,
             train_id=train_id,
         )
     except Exception as e:

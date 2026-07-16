@@ -1,8 +1,8 @@
 """
 PROJECT THEMIS - Decision Engine
-Version: 5.0
+Version: 6.0
 
-Generates warnings, alerts, and final decisions.
+Generates warnings, decisions, and door recommendations based on spatial occupancy.
 """
 
 from typing import Dict, List, Optional
@@ -11,7 +11,7 @@ from app.schemas.occupancy import Warning, Decision
 
 
 class DecisionEngine:
-    """Generates warnings and decisions from occupancy data."""
+    """Generates warnings and decisions from spatial occupancy data."""
 
     def __init__(self):
         pass
@@ -20,25 +20,30 @@ class DecisionEngine:
         """
         Evaluate car data and generate warning if needed.
         """
-        status = car_data.get("status", "LOW")
+        density_indicator = car_data.get("density_indicator", "GREEN")
         car_id = car_data.get("car_id", 0)
-        occupancy_pct = car_data.get("occupancy_percentage", 0)
+        occupancy_ratio = car_data.get("occupancy_ratio", 0)
 
-        if status in ("HIGH", "FULL", "OVERCAPACITY"):
-            severity = "CRITICAL" if status in ("FULL", "OVERCAPACITY") else "WARNING"
-            message = f"Car {car_id} is {status} ({occupancy_pct}%)"
-
+        if density_indicator == "RED":
             return Warning(
                 train_id=train_id,
                 car_id=car_id,
-                warning_type=f"{status}_OCCUPANCY",
-                severity=severity,
-                message=message,
+                warning_type="RED_DENSITY",
+                severity="CRITICAL",
+                message=f"Car {car_id} is RED density (occupancy: {occupancy_ratio:.1%})",
+            )
+        elif density_indicator == "YELLOW":
+            return Warning(
+                train_id=train_id,
+                car_id=car_id,
+                warning_type="YELLOW_DENSITY",
+                severity="WARNING",
+                message=f"Car {car_id} is YELLOW density (occupancy: {occupancy_ratio:.1%})",
             )
 
         return None
 
-    def generate_decision(
+    def generate_redistribution_decision(
         self,
         train_id: str,
         from_car_id: int,
@@ -46,32 +51,47 @@ class DecisionEngine:
         confidence: float,
         reason: str,
     ) -> Decision:
-        """Generate a decision/recommendation."""
+        """Generate a redistribution decision."""
         return Decision(
             train_id=train_id,
             from_car_id=from_car_id,
             to_car_id=to_car_id,
-            action="MOVE_PASSENGER",
+            action="REDISTRIBUTION",
             confidence=confidence,
             reason=reason,
         )
 
-    def get_led_state(self, status: str) -> str:
-        """Get LED state from occupancy status."""
-        led_map = {
-            "LOW": "GREEN",
-            "NORMAL": "GREEN",
-            "HIGH": "YELLOW",
-            "FULL": "RED",
-            "OVERCAPACITY": "RED_BLINK",
-        }
-        return led_map.get(status, "OFF")
+    def generate_door_decision(
+        self,
+        train_id: str,
+        car_id: int,
+        door_action: str,
+        reason: str,
+    ) -> Decision:
+        """Generate a door action decision."""
+        return Decision(
+            train_id=train_id,
+            from_car_id=car_id,
+            to_car_id=None,
+            action=f"DOOR_{door_action}",
+            door_action=door_action,
+            confidence=0.95,
+            reason=reason,
+        )
 
-    def get_audio_event(self, status: str) -> Optional[str]:
-        """Get audio event from occupancy status."""
-        audio_map = {
-            "HIGH": "warning_chime",
-            "FULL": "alert_tone",
-            "OVERCAPACITY": "emergency_alert",
+    def get_led_state(self, density_indicator: str) -> str:
+        """Get LED state from density indicator."""
+        led_map = {
+            "GREEN": "GREEN",
+            "YELLOW": "YELLOW",
+            "RED": "RED",
         }
-        return audio_map.get(status)
+        return led_map.get(density_indicator, "OFF")
+
+    def get_audio_event(self, density_indicator: str) -> Optional[str]:
+        """Get audio event from density indicator."""
+        audio_map = {
+            "YELLOW": "warning_chime",
+            "RED": "alert_tone",
+        }
+        return audio_map.get(density_indicator)

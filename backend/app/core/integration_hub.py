@@ -1,9 +1,8 @@
 """
 PROJECT THEMIS - Integration Hub
-Version: 5.0
+Version: 6.0
 
-Central distribution layer that broadcasts state to all clients.
-Ensures all events are properly distributed via WebSocket.
+Central distribution layer that broadcasts PipelineState to all clients.
 """
 
 import asyncio
@@ -13,15 +12,13 @@ from typing import Any, Dict, Optional
 
 class IntegrationHub:
     """
-    Integration Hub distributes state to all clients.
-    
+    Integration Hub distributes PipelineState to all clients.
+
     Flow:
     State Manager → Integration Hub → REST API + WebSocket
-    
+
     Responsibilities:
-    - Broadcast occupancy updates
-    - Broadcast prediction updates
-    - Broadcast recommendation changes
+    - Broadcast pipeline state updates (main V6 event)
     - Broadcast warning updates
     - Broadcast camera status updates
     - Broadcast simulation reset
@@ -57,25 +54,9 @@ class IntegrationHub:
             except Exception as e:
                 print(f"[IntegrationHub] Broadcast error: {e}")
 
-    async def broadcast_occupancy_updated(self, car_id: int, occupancy_data: Dict[str, Any], train_id: str = "SF10-001"):
-        """Broadcast occupancy update event."""
-        await self.broadcast("occupancy_updated", {
-            "car_id": car_id,
-            **occupancy_data
-        }, train_id)
-
-    async def broadcast_prediction_updated(self, car_id: int, prediction: Dict[str, Any], train_id: str = "SF10-001"):
-        """Broadcast prediction update event."""
-        await self.broadcast("prediction_updated", {
-            "car_id": car_id,
-            "prediction": prediction,
-        }, train_id)
-
-    async def broadcast_recommendation_changed(self, recommendation: Dict[str, Any], train_id: str = "SF10-001"):
-        """Broadcast recommendation change event."""
-        await self.broadcast("recommendation_changed", {
-            "recommendation": recommendation,
-        }, train_id)
+    async def broadcast_pipeline_state_updated(self, pipeline_state: Dict[str, Any], train_id: str = "SF10-001"):
+        """Broadcast pipeline state update (main V6 event)."""
+        await self.broadcast("pipeline_state_updated", pipeline_state, train_id)
 
     async def broadcast_warning_updated(self, warning: Dict[str, Any], train_id: str = "SF10-001"):
         """Broadcast warning update event."""

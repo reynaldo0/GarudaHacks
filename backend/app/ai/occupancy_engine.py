@@ -1,64 +1,70 @@
 """
 PROJECT THEMIS - Occupancy Engine
-Version: 5.0
+Version: 6.0
 
-Calculates occupancy from YOLO detections.
+Calculates occupancy from spatial segmentation results.
 """
 
-from typing import Dict, List
+from typing import Dict
 from loguru import logger
 from app.config.settings import settings
 
 
 class OccupancyEngine:
-    """Calculates occupancy percentage and status from person detections."""
+    """Calculates occupancy metrics from spatial occupancy data."""
 
-    def __init__(self, default_capacity: int = 200):
-        self.default_capacity = default_capacity
+    def __init__(self, floor_area_m2: float = None):
+        self.floor_area_m2 = floor_area_m2 or settings.FLOOR_AREA_M2
 
-    def calculate(self, person_count: int, capacity: int = None) -> Dict:
+    def calculate(self, spatial_occupancy_score: float, free_space_ratio: float = None) -> Dict:
         """
-        Calculate occupancy from person count.
-        Returns occupancy percentage, status, risk score.
-        """
-        cap = capacity or self.default_capacity
-        if cap <= 0:
-            cap = 200
+        Calculate occupancy from spatial occupancy score.
 
-        occupancy_pct = (person_count / cap) * 100
-        status = self._determine_status(occupancy_pct)
-        risk_score = self._calculate_risk(occupancy_pct)
+        Args:
+            spatial_occupancy_score: float (0.0 - 1.0) from spatial segmentation
+            free_space_ratio: float (0.0 - 1.0) optional override
+
+        Returns:
+            Dict with occupancy_ratio, free_space_ratio, density_indicator, risk_score
+        """
+        occupancy_ratio = spatial_occupancy_score
+        if free_space_ratio is None:
+            free_space_ratio = 1.0 - occupancy_ratio
+
+        density_indicator = self._determine_density(occupancy_ratio)
+        risk_score = self._calculate_risk(occupancy_ratio)
 
         return {
-            "person_count": person_count,
-            "capacity": cap,
-            "occupancy_percentage": round(occupancy_pct, 2),
-            "status": status,
-            "risk_score": round(risk_score, 2),
+            "occupancy_ratio": round(float(occupancy_ratio), 4),
+            "free_space_ratio": round(float(free_space_ratio), 4),
+            "density_indicator": density_indicator,
+            "risk_score": round(float(risk_score), 4),
+            "floor_area_m2": self.floor_area_m2,
         }
 
-    def _determine_status(self, occupancy_pct: float) -> str:
-        """Determine occupancy status from percentage."""
-        if occupancy_pct < 40:
-            return "LOW"
-        elif occupancy_pct < 70:
-            return "NORMAL"
-        elif occupancy_pct < 90:
-            return "HIGH"
-        elif occupancy_pct <= 100:
-            return "FULL"
-        else:
-            return "OVERCAPACITY"
+    def _determine_density(self, occupancy_ratio: float) -> str:
+        """
+        Determine density indicator from occupancy ratio.
 
-    def _calculate_risk(self, occupancy_pct: float) -> float:
-        """Calculate risk score from occupancy percentage."""
-        if occupancy_pct < 40:
+        Thresholds:
+            - occupancy < 0.4 -> GREEN (lots of free space)
+            - occupancy 0.4 - 0.7 -> YELLOW (moderate)
+            - occupancy > 0.7 -> RED (high density)
+        """
+        if occupancy_ratio < 0.4:
+            return "GREEN"
+        elif occupancy_ratio < 0.7:
+            return "YELLOW"
+        else:
+            return "RED"
+
+    def _calculate_risk(self, occupancy_ratio: float) -> float:
+        """Calculate risk score from occupancy ratio."""
+        if occupancy_ratio < 0.4:
             return 0.1
-        elif occupancy_pct < 70:
-            return 0.3
-        elif occupancy_pct < 90:
+        elif occupancy_ratio < 0.7:
+            return 0.4
+        elif occupancy_ratio < 0.9:
             return 0.7
-        elif occupancy_pct <= 100:
-            return 0.9
         else:
             return 1.0

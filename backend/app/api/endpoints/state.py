@@ -1,8 +1,8 @@
 """
 PROJECT THEMIS - State Endpoint
-Version: 5.0
+Version: 6.0
 
-This endpoint provides current system state.
+This endpoint provides current system state with PipelineState.
 """
 
 from fastapi import APIRouter
@@ -16,7 +16,7 @@ router = APIRouter()
 async def get_state():
     """
     Get current system state.
-    Returns complete state from State Manager.
+    Returns complete PipelineState from State Manager.
     """
     trains = state_manager.get_all_trains()
     warnings = state_manager.get_active_warnings()
@@ -25,19 +25,24 @@ async def get_state():
     train_data = None
     if trains:
         train = trains[0]
-        total_passengers = sum(c.detected_persons for c in train.cars)
-        total_capacity = sum(c.capacity for c in train.cars)
-        pct = (total_passengers / total_capacity * 100) if total_capacity > 0 else 0
+
+        # Calculate total occupancy
+        total_occupancy = sum(getattr(c, 'occupancy_ratio', 0) for c in train.cars)
+        avg_occupancy = total_occupancy / len(train.cars) if train.cars else 0
+
+        # Count density indicators
+        green_count = sum(1 for c in train.cars if getattr(c, 'density_indicator', 'GREEN') == 'GREEN')
+        yellow_count = sum(1 for c in train.cars if getattr(c, 'density_indicator', 'GREEN') == 'YELLOW')
+        red_count = sum(1 for c in train.cars if getattr(c, 'density_indicator', 'GREEN') == 'RED')
 
         train_data = {
             "id": train.train_id,
             "formation": train.formation,
-            "capacity": 200,
             "totalCars": train.total_cars,
-            "totalPassengers": total_passengers,
-            "totalCapacity": total_capacity,
-            "percentage": round(pct, 2),
-            "status": state_manager._calculate_status(pct),
+            "avgOccupancyRatio": round(avg_occupancy, 4),
+            "greenCars": green_count,
+            "yellowCars": yellow_count,
+            "redCars": red_count,
         }
 
     warning_data = None
@@ -62,14 +67,13 @@ async def get_state():
             "train": train_data or {
                 "id": "SF10",
                 "formation": "SF10",
-                "capacity": 200,
-                "total_cars": 10,
+                "totalCars": 10,
             },
             "occupancy": train_data or {
-                "totalPassengers": 0,
-                "totalCapacity": 2000,
-                "percentage": 0,
-                "status": "UNKNOWN",
+                "avgOccupancyRatio": 0,
+                "greenCars": 0,
+                "yellowCars": 0,
+                "redCars": 0,
             },
             "warning": warning_data,
             "system": summary,

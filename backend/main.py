@@ -13,20 +13,26 @@ from app.websocket.router import ws_router
 from app.core.exceptions import setup_exception_handlers
 from app.core.state_manager import state_manager
 from app.database.connection import init_db
-from app.ai.yolo_engine import YOLOEngine
+from app.ai.spatial_engine import SpatialEngine
 from app.ai.occupancy_engine import OccupancyEngine
 from app.ai.lookup_table import LookupTable
 from app.ai.fusion_engine import FusionEngine
-from app.ai.cales_engine import CALESEngine
+from app.ai.ccales_engine import CCALESEngine
 from app.ai.decision_engine import DecisionEngine
+from app.ai.redistribution_engine import RedistributionEngine
+from app.ai.door_engine import DoorEngine
+from app.ai.announcement_engine import AnnouncementEngine
 
 # Global AI engine instances
-yolo_engine = None
+spatial_engine = None
 occupancy_engine = None
 lookup_table = None
 fusion_engine = None
 cales_engine = None
 decision_engine = None
+redistribution_engine = None
+door_engine = None
+announcement_engine = None
 
 
 @asynccontextmanager
@@ -46,6 +52,7 @@ async def lifespan(app: FastAPI):
     # Create necessary directories
     Path("logs").mkdir(exist_ok=True)
     Path("weights").mkdir(exist_ok=True)
+    Path(settings.FISHEYE_CALIBRATION_DIR).mkdir(parents=True, exist_ok=True)
 
     # Initialize database
     print("[INFO] Initializing PostgreSQL database...")
@@ -56,24 +63,29 @@ async def lifespan(app: FastAPI):
         print(f"[WARN] Database init failed: {e}")
         print("[INFO] Continuing without database...")
 
-    # Initialize AI model
-    global yolo_engine, occupancy_engine, lookup_table, fusion_engine, cales_engine, decision_engine
+    # Initialize AI engines
+    global spatial_engine, occupancy_engine, lookup_table, fusion_engine
+    global cales_engine, decision_engine, redistribution_engine
+    global door_engine, announcement_engine
 
     print("[INFO] Initializing AI engines...")
+    spatial_engine = SpatialEngine()
     occupancy_engine = OccupancyEngine()
     lookup_table = LookupTable()
     fusion_engine = FusionEngine()
-    cales_engine = CALESEngine()
+    cales_engine = CCALESEngine()
     decision_engine = DecisionEngine()
-    print("[OK] AI engines initialized (occupancy, lookup, fusion, cales, decision)")
+    redistribution_engine = RedistributionEngine()
+    door_engine = DoorEngine()
+    announcement_engine = AnnouncementEngine()
+    print("[OK] AI engines initialized (spatial, occupancy, lookup, fusion, cales, decision, redistribution, door, announcement)")
 
-    print("[INFO] Loading YOLO11s model...")
-    yolo_engine = YOLOEngine(model_path=settings.MODEL_PATH, confidence=settings.MODEL_CONFIDENCE)
-    yolo_loaded = yolo_engine.load()
-    if yolo_loaded:
-        print("[OK] YOLO model loaded")
+    print("[INFO] Loading Spatial Occupancy Segmentation model...")
+    spatial_loaded = spatial_engine.load()
+    if spatial_loaded:
+        print("[OK] Spatial segmentation model loaded")
     else:
-        print("[WARN] YOLO model not loaded (weights not found)")
+        print("[WARN] Spatial segmentation model not loaded (weights not found)")
 
     # Initialize State Manager
     print("[INFO] Initializing State Manager...")
@@ -90,7 +102,7 @@ async def lifespan(app: FastAPI):
         print(f"[WARN] Seeding failed: {e}")
 
     print()
-    print("[OK] PROJECT THEMIS is ready!")
+    print("[OK] PROJECT THEMIS V6 is ready!")
     print()
 
     yield

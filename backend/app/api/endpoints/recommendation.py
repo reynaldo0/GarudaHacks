@@ -1,9 +1,8 @@
 """
 PROJECT THEMIS - Recommendation Endpoint
-Version: 7.0
+Version: 6.0
 
-Generates ranked multi-destination AI recommendations.
-Returns a list of recommended destination cars ranked by score.
+Generates redistribution recommendations based on spatial occupancy.
 """
 
 from fastapi import APIRouter
@@ -15,8 +14,8 @@ router = APIRouter()
 
 WOMEN_CARS = {1, 10}
 MAX_RECOMMENDATIONS = 3
-MIN_OCCUPANCY_SOURCE = 50
-MIN_IMBALANCE = 12
+MIN_OCCUPANCY_SOURCE = 0.5
+MIN_IMBALANCE = 0.12
 DISTANCE_WEIGHT = 0.15
 OCCUPANCY_WEIGHT = 0.55
 BALANCE_WEIGHT = 0.30
@@ -24,17 +23,17 @@ BALANCE_WEIGHT = 0.30
 
 def _score_car(car: Any, source_car: Any, cars: list, congestion_avg: float) -> float:
     """Score a destination car (higher = better recommendation)."""
-    occ = car.occupancy_percentage
+    occ = getattr(car, 'occupancy_ratio', 0)
     distance = abs(car.car_id - source_car.car_id)
     walking_cost = distance * 0.5
 
-    occupancy_score = max(0, 100 - occ) * OCCUPANCY_WEIGHT
+    occupancy_score = max(0, 1.0 - occ) * OCCUPANCY_WEIGHT
 
     balance_score = 0
-    if occ < congestion_avg - 10:
-        balance_score = 20 * BALANCE_WEIGHT
+    if occ < congestion_avg - 0.1:
+        balance_score = 0.2 * BALANCE_WEIGHT
     elif occ < congestion_avg:
-        balance_score = 10 * BALANCE_WEIGHT
+        balance_score = 0.1 * BALANCE_WEIGHT
 
     distance_penalty = walking_cost * DISTANCE_WEIGHT
 
@@ -53,13 +52,13 @@ async def get_recommendation():
     if not cars:
         return {"success": True, "data": None}
 
-    sorted_by_occ = sorted(cars, key=lambda c: c.occupancy_percentage, reverse=True)
+    sorted_by_occ = sorted(cars, key=lambda c: getattr(c, 'occupancy_ratio', 0), reverse=True)
     source_car = sorted_by_occ[0]
 
-    if source_car.occupancy_percentage < MIN_OCCUPANCY_SOURCE:
+    if getattr(source_car, 'occupancy_ratio', 0) < MIN_OCCUPANCY_SOURCE:
         return {"success": True, "data": None}
 
-    all_occ = [c.occupancy_percentage for c in cars]
+    all_occ = [getattr(c, 'occupancy_ratio', 0) for c in cars]
     congestion_avg = sum(all_occ) / len(all_occ) if all_occ else 0
     highest_occ = all_occ[0] if all_occ else 0
 
@@ -67,7 +66,7 @@ async def get_recommendation():
     for car in cars:
         if car.car_id == source_car.car_id:
             continue
-        diff = source_car.occupancy_percentage - car.occupancy_percentage
+        diff = getattr(source_car, 'occupancy_ratio', 0) - getattr(car, 'occupancy_ratio', 0)
         if diff < MIN_IMBALANCE:
             continue
         score = _score_car(car, source_car, cars, congestion_avg)
@@ -82,10 +81,7 @@ async def get_recommendation():
 
     recommendations = []
     for rank, (score, car) in enumerate(top, 1):
-        confidence = min(0.97, score / 100 + 0.3)
-        passengers_estimate = max(3, int(
-            (source_car.occupancy_percentage - car.occupancy_percentage) * 1.5
-        ))
+        confidence = min(0.97, score / 1.0 + 0.3)
         is_women = car.car_id in WOMEN_CARS
 
         label = (
@@ -94,29 +90,28 @@ async def get_recommendation():
         )
 
         recommendations.append({
-            "action": "MOVE_PASSENGERS",
+            "action": "REDISTRIBUTION",
             "fromCarId": source_car.car_id,
             "toCarId": car.car_id,
             "confidence": round(confidence, 2),
             "reason": (
-                f"Gerbong {source_car.car_id} {source_car.occupancy_percentage:.0f}% -> "
-                f"Gerbong {car.car_id} {car.occupancy_percentage:.0f}%."
+                f"Gerbong {source_car.car_id} {getattr(source_car, 'occupancy_ratio', 0):.0%} -> "
+                f"Gerbong {car.car_id} {getattr(car, 'occupancy_ratio', 0):.0%}."
                 + (" (Khusus Wanita)" if is_women else "")
             ),
             "priority": rank,
             "label": label,
             "isWomenPriority": is_women,
-            "passengersToMove": passengers_estimate,
-            "score": round(score, 1),
+            "score": round(score, 4),
         })
 
     return {
         "success": True,
         "data": {
             "fromCarId": source_car.car_id,
-            "fromOccupancy": source_car.occupancy_percentage,
-            "congestionAvg": round(congestion_avg, 1),
-            "highestOccupancy": round(highest_occ, 1),
+            "fromOccupancy": getattr(source_car, 'occupancy_ratio', 0),
+            "congestionAvg": round(congestion_avg, 4),
+            "highestOccupancy": round(highest_occ, 4),
             "recommendedCars": [r["toCarId"] for r in recommendations],
             "recommendations": recommendations,
             "timestamp": datetime.utcnow().isoformat(),
