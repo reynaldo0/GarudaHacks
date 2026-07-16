@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, ArrowRight, AlertTriangle, CheckCircle, Radio } from "lucide-react";
+import { Clock, AlertTriangle, CheckCircle, Radio } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import clsx from "clsx";
 
@@ -41,7 +41,7 @@ export function Timeline() {
   const iconMap = {
     warning: <AlertTriangle className="w-4 h-4 text-secondary" />,
     success: <CheckCircle className="w-4 h-4 text-green-600" />,
-    info: <ArrowRight className="w-4 h-4 text-primary" />,
+    info: <Radio className="w-4 h-4 text-primary" />,
   };
 
   const dotColorMap = {

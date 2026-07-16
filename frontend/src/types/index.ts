@@ -35,16 +35,27 @@ export interface Warning {
   isActive: boolean;
 }
 
-export interface Recommendation {
+export interface RecommendationItem {
   action: string;
   fromCarId: number;
   toCarId: number;
   confidence: number;
   reason: string;
-  passengersToMove?: number;
-  priority?: number;
-  isWomenPriority?: boolean;
-  womenAlternative?: Recommendation;
+  priority: number;
+  label: string;
+  isWomenPriority: boolean;
+  passengersToMove: number;
+  score: number;
+}
+
+export interface Recommendation {
+  fromCarId: number;
+  fromOccupancy: number;
+  congestionAvg: number;
+  highestOccupancy: number;
+  recommendedCars: number[];
+  recommendations: RecommendationItem[];
+  timestamp: string;
 }
 
 export interface SystemState {

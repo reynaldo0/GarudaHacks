@@ -84,8 +84,6 @@ export function KPICard({
               trend === "neutral" && "text-muted-foreground"
             )}
           >
-            {trend === "up" && "\u2191"}
-            {trend === "down" && "\u2193"}
             {trendValue}
           </span>
         </div>

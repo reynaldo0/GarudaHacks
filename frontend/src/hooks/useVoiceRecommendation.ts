@@ -37,42 +37,16 @@ function speakSequential(texts: { text: string; lang: "id" | "en" }[]) {
 
 function buildIdText(rec: Recommendation): string {
   const fromName = carNameId[rec.fromCarId] || String(rec.fromCarId);
-  const toName = carNameId[rec.toCarId] || String(rec.toCarId);
-  const pct = Math.round(rec.confidence * 100);
-  const isWomen = rec.isWomenPriority;
-  const lines: string[] = [];
-
-  lines.push(`Perhatian. Gerbong ${fromName} ${isWomen ? "khusus wanita" : ""} penuh.`);
-  lines.push(`Disarankan memindahkan penumpang dari gerbong ${fromName} ke gerbong ${toName} ${isWomen ? "khusus wanita" : ""}.`);
-  lines.push(`Tingkat kepercayaan ${pct} persen.`);
-
-  if (rec.womenAlternative) {
-    const wFrom = carNameId[rec.womenAlternative.fromCarId] || String(rec.womenAlternative.fromCarId);
-    const wTo = carNameId[rec.womenAlternative.toCarId] || String(rec.womenAlternative.toCarId);
-    lines.push(`Alternatif untuk penumpang wanita. Pindahkan dari gerbong ${wFrom} ke gerbong ${wTo} khusus wanita.`);
-  }
-
-  return lines.join(" ");
+  const toName = carNameId[rec.recommendations[0]?.toCarId] || String(rec.recommendations[0]?.toCarId);
+  const women = rec.recommendations[0]?.isWomenPriority ? " khusus wanita" : "";
+  return `Perhatian. Gerbong ${fromName} penuh. Kepada seluruh penumpang di gerbong ${fromName}, dimohon untuk berpindah ke gerbong ${toName}${women}. Terima kasih.`;
 }
 
 function buildEnText(rec: Recommendation): string {
   const fromName = carNameEn[rec.fromCarId] || String(rec.fromCarId);
-  const toName = carNameEn[rec.toCarId] || String(rec.toCarId);
-  const pct = Math.round(rec.confidence * 100);
-  const isWomen = rec.isWomenPriority;
-  const lines: string[] = [];
-
-  lines.push(`Attention. Car ${fromName} ${isWomen ? "women only" : ""} is full.`);
-  lines.push(`Please move passengers from car ${fromName} to car ${toName} ${isWomen ? "women only" : ""}.`);
-  lines.push(`Confidence level ${pct} percent.`);
-
-  if (rec.womenAlternative) {
-    const wFrom = carNameEn[rec.womenAlternative.fromCarId] || String(rec.womenAlternative.fromCarId);
-    const wTo = carNameEn[rec.womenAlternative.toCarId] || String(rec.womenAlternative.toCarId);
-    lines.push(`Alternative for women passengers. Move from car ${wFrom} to women only car ${wTo}.`);
-  }
-
-  return lines.join(" ");
+  const toName = carNameEn[rec.recommendations[0]?.toCarId] || String(rec.recommendations[0]?.toCarId);
+  const women = rec.recommendations[0]?.isWomenPriority ? ", women only" : "";
+  return `Attention. Car ${fromName} is full. Passengers in car ${fromName}, please move to car ${toName}${women}. Thank you.`;
 }
 
 export function useVoiceRecommendation(recommendation: Recommendation | null) {
@@ -80,7 +54,7 @@ export function useVoiceRecommendation(recommendation: Recommendation | null) {
   const cooldownRef = useRef<NodeJS.Timeout | null>(null);
 
   const speak = useCallback((rec: Recommendation) => {
-    const key = `${rec.fromCarId}-${rec.toCarId}`;
+    const key = `${rec.fromCarId}-${rec.recommendations.map((r) => r.toCarId).join(",")}`;
     if (key === lastSpokenRef.current) return;
 
     if (cooldownRef.current) clearTimeout(cooldownRef.current);
@@ -90,17 +64,14 @@ export function useVoiceRecommendation(recommendation: Recommendation | null) {
       lastSpokenRef.current = "";
     }, COOLDOWN_MS);
 
-    const idText = buildIdText(rec);
-    const enText = buildEnText(rec);
-
     speakSequential([
-      { text: idText, lang: "id" },
-      { text: enText, lang: "en" },
+      { text: buildIdText(rec), lang: "id" },
+      { text: buildEnText(rec), lang: "en" },
     ]);
   }, []);
 
   useEffect(() => {
-    if (recommendation) {
+    if (recommendation && recommendation.recommendations?.length > 0) {
       speak(recommendation);
     }
     return () => {

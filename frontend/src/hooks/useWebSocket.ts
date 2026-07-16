@@ -73,15 +73,18 @@ function handleMessage(message: WebSocketMessage) {
 
     case "recommendation_changed": {
       if (message.data) {
-        const rec = (message.data.recommendation as Record<string, string>) || message.data;
-        store.setRecommendation(rec as never);
-        store.addTimelineEvent({
-          id: `rec-${Date.now()}`,
-          timestamp: ts,
-          type: "recommendation",
-          message: `AI: Move passengers from Car ${rec.fromCarId} to Car ${rec.toCarId}`,
-          severity: "info",
-        });
+        const recData = (message.data.recommendation as Record<string, unknown>) || message.data;
+        store.setRecommendation(recData as never);
+        const top = (recData.recommendations as Array<Record<string, unknown>>)?.[0];
+        if (top) {
+          store.addTimelineEvent({
+            id: `rec-${Date.now()}`,
+            timestamp: ts,
+            type: "recommendation",
+            message: `AI: Move passengers from Car ${top.fromCarId} to Car ${top.toCarId}`,
+            severity: "info",
+          });
+        }
       }
       break;
     }
