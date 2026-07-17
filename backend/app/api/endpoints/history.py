@@ -30,38 +30,33 @@ async def get_history(
         if car_id:
             match = next((c for c in cars if c.car_id == car_id), None)
             if match:
-                base_occ = match.occupancy_percentage / 100.0
+                base_occ = getattr(match, 'occupancy_ratio', 0.5)
         else:
-            base_occ = sum(c.occupancy_percentage for c in cars) / (len(cars) * 100.0)
+            base_occ = sum(getattr(c, 'occupancy_ratio', 0) for c in cars) / (len(cars) * 1.0) if cars else 0.5
 
     points = min(max(hours, 1), 24)
     rng = random.Random(42 + (car_id or 0))
     records = []
     for i in range(points):
         variation = rng.uniform(-0.12, 0.12)
-        occ = max(0.0, min(1.2, base_occ + variation - (i * 0.005)))
-        pct = occ * 100
-        status = "LOW"
-        if pct >= 100:
-            status = "OVERCAPACITY"
-        elif pct >= 90:
-            status = "FULL"
-        elif pct >= 70:
-            status = "HIGH"
-        elif pct >= 40:
-            status = "NORMAL"
+        occ = max(0.0, min(1.0, base_occ + variation - (i * 0.005)))
+        if occ < 0.4:
+            density = "GREEN"
+        elif occ < 0.7:
+            density = "YELLOW"
+        else:
+            density = "RED"
         records.append(
             {
                 "timestamp": (datetime.now() - timedelta(hours=i)).isoformat(),
                 "car_id": car_id or 4,
-                "occupancy": round(occ, 3),
-                "occupancy_percentage": round(pct, 2),
-                "status": status,
+                "occupancy_ratio": round(occ, 4),
+                "density_indicator": density,
             }
         )
 
-    avg = sum(r["occupancy"] for r in records) / len(records) if records else 0
-    peak = max((r["occupancy"] for r in records), default=0)
+    avg = sum(r["occupancy_ratio"] for r in records) / len(records) if records else 0
+    peak = max((r["occupancy_ratio"] for r in records), default=0)
 
     return {
         "success": True,

@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
 import { TrainOverview } from "@/components/TrainOverview";
 import { OccupancyChart } from "@/components/OccupancyChart";
-import { CarOccupancy, OccupancyCarResponse } from "@/types";
-import { WifiOff, Loader2, Users } from "lucide-react";
+import { CarSpatialOccupancy } from "@/types";
+import { WifiOff, Loader2 } from "lucide-react";
 import clsx from "clsx";
 
 export default function TrainPage() {
-  const [cars, setCars] = useState<CarOccupancy[]>([]);
+  const [cars, setCars] = useState<CarSpatialOccupancy[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -19,15 +19,16 @@ export default function TrainPage() {
         const data = await apiClient.getOccupancy();
         if (data?.cars) {
           setCars(
-            data.cars.map((c: OccupancyCarResponse) => ({
+            data.cars.map((c: CarSpatialOccupancy) => ({
               carId: c.carId,
-              occupancyPct: c.occupancyPct,
-              status: c.status,
-              passengers: c.passengers,
-              capacity: c.capacity,
-              prediction: c.prediction || null,
+              occupancyRatio: c.occupancyRatio,
+              freeSpaceRatio: c.freeSpaceRatio,
+              densityIndicator: c.densityIndicator,
+              spatialOccupancyScore: c.spatialOccupancyScore,
               cameraStatus: c.cameraStatus || "active",
-              recommendation: c.recommendation || null,
+              cameraId: c.cameraId,
+              riskScore: c.riskScore,
+              prediction: c.prediction || null,
             }))
           );
           setError(false);
@@ -59,7 +60,7 @@ export default function TrainPage() {
       <div className="space-y-6">
         <div className="animate-fade-in">
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Train Status</h1>
-          <p className="text-muted-foreground text-sm mt-1">SF10 Formation &mdash; Real-time occupancy</p>
+          <p className="text-muted-foreground text-sm mt-1">SF10 Formation &mdash; Real-time spatial occupancy</p>
         </div>
         <div className="flex items-center justify-center min-h-[40vh]">
           <div className="glass rounded-2xl p-10 max-w-md text-center animate-fade-in">
@@ -76,33 +77,31 @@ export default function TrainPage() {
     );
   }
 
-  const statusConfig: Record<string, { bg: string; text: string }> = {
-    LOW: { bg: "bg-green-50", text: "text-green-600" },
-    NORMAL: { bg: "bg-emerald-50", text: "text-emerald-600" },
-    HIGH: { bg: "bg-amber-50", text: "text-amber-600" },
-    FULL: { bg: "bg-orange-50", text: "text-orange-600" },
-    OVERCAPACITY: { bg: "bg-red-50", text: "text-red-600" },
+  const densityColorMap: Record<string, { bg: string; text: string }> = {
+    GREEN: { bg: "bg-green-50", text: "text-green-600" },
+    YELLOW: { bg: "bg-amber-50", text: "text-amber-600" },
+    RED: { bg: "bg-red-50", text: "text-red-600" },
   };
 
   return (
     <div className="space-y-6">
       <div className="animate-fade-in">
         <h1 className="text-2xl font-bold text-foreground tracking-tight">Train Status</h1>
-        <p className="text-muted-foreground text-sm mt-1">SF10 Formation &mdash; Real-time occupancy</p>
+        <p className="text-muted-foreground text-sm mt-1">SF10 Formation &mdash; Real-time spatial occupancy</p>
       </div>
 
       <TrainOverview cars={cars} />
       <OccupancyChart
         data={cars.map((c) => ({
           carId: c.carId,
-          occupancy: c.occupancyPct,
-          status: c.status,
+          occupancyRatio: c.occupancyRatio,
+          densityIndicator: c.densityIndicator,
         }))}
       />
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {cars.map((car, i) => {
-          const cfg = statusConfig[car.status] || statusConfig.NORMAL;
+          const cfg = densityColorMap[car.densityIndicator] || densityColorMap.GREEN;
           return (
             <div
               key={car.carId}
@@ -111,20 +110,17 @@ export default function TrainPage() {
             >
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Car {car.carId}</p>
               <p className="text-3xl font-bold mt-2 text-foreground tracking-tight">
-                {car.occupancyPct.toFixed(0)}%
+                {(car.occupancyRatio * 100).toFixed(0)}%
               </p>
-              <div className="flex items-center justify-center gap-1 mt-1">
-                <Users className="w-3 h-3 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  {car.passengers} / {car.capacity}
-                </p>
-              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Free: {(car.freeSpaceRatio * 100).toFixed(0)}%
+              </p>
               <div className={clsx(
                 "mt-3 px-3 py-1 rounded-lg inline-block text-xs font-medium",
                 cfg.bg,
                 cfg.text
               )}>
-                {car.status}
+                {car.densityIndicator}
               </div>
             </div>
           );

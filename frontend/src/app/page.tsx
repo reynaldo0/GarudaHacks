@@ -13,7 +13,7 @@ import { apiClient } from "@/lib/api";
 import { useAppStore } from "@/store/useAppStore";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useVoiceRecommendation } from "@/hooks/useVoiceRecommendation";
-import { SystemState, OccupancyCarResponse } from "@/types";
+import { SystemState, CarSpatialOccupancy } from "@/types";
 
 export default function DashboardPage() {
   const {
@@ -47,15 +47,16 @@ export default function DashboardPage() {
             const occData = await apiClient.getOccupancy();
             if (occData?.cars) {
               setCars(
-                occData.cars.map((c: OccupancyCarResponse) => ({
+                occData.cars.map((c: CarSpatialOccupancy) => ({
                   carId: c.carId,
-                  occupancyPct: c.occupancyPct,
-                  status: c.status,
-                  passengers: c.passengers,
-                  capacity: c.capacity,
-                  prediction: c.prediction || null,
+                  occupancyRatio: c.occupancyRatio,
+                  freeSpaceRatio: c.freeSpaceRatio,
+                  densityIndicator: c.densityIndicator,
+                  spatialOccupancyScore: c.spatialOccupancyScore,
                   cameraStatus: c.cameraStatus || "active",
-                  recommendation: c.recommendation || null,
+                  cameraId: c.cameraId,
+                  riskScore: c.riskScore,
+                  prediction: c.prediction || null,
                 }))
               );
             }
@@ -88,14 +89,15 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const totalPassengers =
-    systemState?.train?.totalPassengers ||
-    cars.reduce((sum, c) => sum + c.passengers, 0);
-  const totalCapacity = systemState?.train?.totalCapacity || 2000;
-  const occupancyPct =
-    systemState?.train?.percentage ||
-    (totalPassengers / totalCapacity) * 100;
-  const status = systemState?.train?.status || "NORMAL";
+  const avgOccupancy = systemState?.occupancy?.avgOccupancyRatio ?? (
+    cars.length > 0
+      ? cars.reduce((sum, c) => sum + c.occupancyRatio, 0) / cars.length
+      : 0
+  );
+  const avgPct = avgOccupancy * 100;
+  const greenCars = systemState?.occupancy?.greenCars ?? cars.filter((c) => c.densityIndicator === "GREEN").length;
+  const yellowCars = systemState?.occupancy?.yellowCars ?? cars.filter((c) => c.densityIndicator === "YELLOW").length;
+  const redCars = systemState?.occupancy?.redCars ?? cars.filter((c) => c.densityIndicator === "RED").length;
 
   if (loading) {
     return (
@@ -132,7 +134,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between animate-fade-in">
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Operation Center</h1>
-          <p className="text-muted-foreground text-sm mt-1">Real-time railway occupancy monitoring</p>
+          <p className="text-muted-foreground text-sm mt-1">Real-time spatial occupancy monitoring</p>
         </div>
         <div className="flex items-center gap-2 glass px-3 py-1.5 rounded-full">
           <div className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500 animate-pulse" : "bg-accent"}`} />
@@ -142,19 +144,19 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
-          title="Total Passengers"
-          value={totalPassengers}
-          subtitle={`of ${totalCapacity} capacity`}
-          icon={<Users className="w-5 h-5" />}
-          variant={occupancyPct > 90 ? "danger" : occupancyPct > 70 ? "warning" : "success"}
+          title="Avg Occupancy"
+          value={`${avgPct.toFixed(1)}%`}
+          subtitle={`${greenCars}G ${yellowCars}Y ${redCars}R`}
+          icon={<Activity className="w-5 h-5" />}
+          variant={redCars > 0 ? "danger" : yellowCars > 0 ? "warning" : "success"}
           delay={0}
         />
         <KPICard
-          title="Occupancy"
-          value={`${occupancyPct.toFixed(1)}%`}
-          subtitle={status}
-          icon={<Activity className="w-5 h-5" />}
-          variant={status === "FULL" ? "danger" : status === "HIGH" ? "warning" : "default"}
+          title="RED Cars"
+          value={redCars}
+          subtitle={`of ${cars.length} total`}
+          icon={<AlertTriangle className="w-5 h-5" />}
+          variant={redCars > 0 ? "danger" : "success"}
           delay={50}
         />
         <KPICard
@@ -179,8 +181,8 @@ export default function DashboardPage() {
           <OccupancyChart
             data={cars.map((c) => ({
               carId: c.carId,
-              occupancy: c.occupancyPct,
-              status: c.status,
+              occupancyRatio: c.occupancyRatio,
+              densityIndicator: c.densityIndicator,
             }))}
           />
         </div>

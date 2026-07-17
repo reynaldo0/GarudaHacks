@@ -1,21 +1,21 @@
 import { create } from "zustand";
-import { SystemState, Warning, Recommendation, CarOccupancy, TimelineEvent } from "@/types";
+import { SystemState, Warning, Recommendation, CarSpatialOccupancy, TimelineEvent, SystemHealthItem } from "@/types";
 
 interface AppState {
   isConnected: boolean;
   systemState: SystemState | null;
   warnings: Warning[];
   recommendation: Recommendation | null;
-  cars: CarOccupancy[];
+  cars: CarSpatialOccupancy[];
   timeline: TimelineEvent[];
+  systemHealth: SystemHealthItem[];
   setConnected: (connected: boolean) => void;
   setSystemState: (state: SystemState) => void;
   setWarnings: (warnings: Warning[]) => void;
   setRecommendation: (rec: Recommendation | null) => void;
-  setCars: (cars: CarOccupancy[]) => void;
+  setCars: (cars: CarSpatialOccupancy[]) => void;
   addTimelineEvent: (event: TimelineEvent) => void;
-  setSystemHealth: (items: import("@/types").SystemHealthItem[]) => void;
-  systemHealth: import("@/types").SystemHealthItem[];
+  setSystemHealth: (items: SystemHealthItem[]) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({

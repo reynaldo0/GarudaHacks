@@ -101,6 +101,12 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"[WARN] Seeding failed: {e}")
 
+    # Wire WebSocket manager to Integration Hub
+    from app.websocket.router import manager as ws_manager
+    from app.core.integration_hub import integration_hub
+    integration_hub.set_websocket_manager(ws_manager)
+    print("[OK] WebSocket manager wired to Integration Hub")
+
     print()
     print("[OK] PROJECT THEMIS V6 is ready!")
     print()
@@ -109,7 +115,12 @@ async def lifespan(app: FastAPI):
 
     # --- Shutdown ---
     print("[INFO] Shutting down PROJECT THEMIS...")
-    # TODO: Cleanup resources
+    try:
+        from app.database.connection import engine
+        engine.dispose()
+        print("[OK] Database connections closed")
+    except Exception as e:
+        print(f"[WARN] Database cleanup error: {e}")
     print("[OK] Shutdown complete")
 
 
@@ -129,7 +140,7 @@ def create_app() -> FastAPI:
     # --- CORS Middleware ---
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
+        allow_origins=settings.cors_origins_list,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

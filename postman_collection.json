@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "PROJECT THEMIS - Backend API v7",
-    "description": "Complete API test collection for PROJECT THEMIS Backend v7\n\nBase URL: http://localhost:8000\nWebSocket URL: ws://localhost:8000/ws\nAPI Key: themis-unity-key-2026\n\nAll endpoints return JSON with 'success' field and 'data' field.\nAll keys use camelCase.\n\nCamera naming: car{XX}_cam{YY} (20 cameras, 2 per car)\n  car01_cam01 = Car 1, front camera\n  car01_cam02 = Car 1, rear camera\n  ...\n  car10_cam02 = Car 10, rear camera\n\nImport this collection into Postman to test all endpoints.",
+    "name": "PROJECT THEMIS - Backend API V6",
+    "description": "Complete API test collection for PROJECT THEMIS Backend V6\n\nBase URL: http://localhost:8000\nWebSocket URL: ws://localhost:8000/ws\nAPI Key: themis-unity-key-2026\n\nAll endpoints return JSON with 'success' field and 'data' field.\n\nCamera naming: car{XX}_cam{YY} (40 cameras, 4 per car)\n  car01_cam01 = Car 1, front_left\n  car01_cam02 = Car 1, front_right\n  car01_cam03 = Car 1, rear_left\n  car01_cam04 = Car 1, rear_right\n  ...\n  car10_cam04 = Car 10, rear_right\n\nPipelineState is the main response format for all car data.\n\nImport this collection into Postman to test all endpoints.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -33,6 +33,7 @@
                   "pm.test('Has name field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('name'); });",
                   "pm.test('Name is PROJECT THEMIS', () => { const d = pm.response.json(); pm.expect(d.name).to.equal('PROJECT THEMIS'); });",
                   "pm.test('Has version field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('version'); });",
+                  "pm.test('Version is 6.0.0', () => { const d = pm.response.json(); pm.expect(d.version).to.equal('6.0.0'); });",
                   "pm.test('Status is running', () => { const d = pm.response.json(); pm.expect(d.status).to.equal('running'); });"
                 ]
               }
@@ -41,7 +42,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/",
-            "description": "Get application information.\n\nResponse:\n```json\n{\n  \"name\": \"PROJECT THEMIS\",\n  \"version\": \"7.0.0\",\n  \"status\": \"running\",\n  \"docs\": \"/docs\"\n}\n```"
+            "description": "Get application information.\n\nResponse:\n```json\n{\n  \"name\": \"PROJECT THEMIS\",\n  \"version\": \"6.0.0\",\n  \"status\": \"running\",\n  \"docs\": \"/docs\"\n}\n```"
           },
           "response": []
         },
@@ -63,7 +64,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/health",
-            "description": "Simple health check.\n\nResponse:\n```json\n{\n  \"status\": \"healthy\",\n  \"version\": \"7.0.0\"\n}\n```"
+            "description": "Simple health check.\n\nResponse:\n```json\n{\n  \"status\": \"healthy\",\n  \"version\": \"6.0.0\"\n}\n```"
           },
           "response": []
         },
@@ -86,7 +87,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/v1/health",
-            "description": "Detailed health check with service status.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"healthy\",\n    \"version\": \"7.0.0\",\n    \"timestamp\": \"2026-07-15T...\",\n    \"uptime\": 1234.56,\n    \"services\": {\n      \"backend\": \"running\",\n      \"database\": \"connected\",\n      \"ai\": \"loaded\",\n      \"websocket\": \"active\"\n    }\n  }\n}\n```"
+            "description": "Detailed health check with service status.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"healthy\",\n    \"version\": \"6.0.0\",\n    \"timestamp\": \"2026-07-15T...\",\n    \"uptime\": 1234.56,\n    \"services\": {\n      \"backend\": \"running\",\n      \"database\": \"connected\",\n      \"ai\": \"loaded\",\n      \"websocket\": \"active\"\n    }\n  }\n}\n```"
           },
           "response": []
         }
@@ -105,6 +106,7 @@
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
                   "pm.test('Has train data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('train'); });",
+                  "pm.test('Has occupancy summary', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('occupancy'); });",
                   "pm.test('Has system summary', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('system'); });",
                   "pm.test('Has timestamp', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('timestamp'); });"
                 ]
@@ -114,7 +116,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/v1/state",
-            "description": "Get complete system state from State Manager.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"timestamp\": \"2026-07-15T...\",\n    \"train\": {\n      \"id\": \"SF10-001\",\n      \"formation\": \"SF10\",\n      \"totalCars\": 10,\n      \"totalPassengers\": 523,\n      \"totalCapacity\": 2000,\n      \"percentage\": 26.15,\n      \"status\": \"NORMAL\"\n    },\n    \"occupancy\": {\n      \"totalPassengers\": 523,\n      \"totalCapacity\": 2000,\n      \"percentage\": 26.15,\n      \"status\": \"NORMAL\"\n    },\n    \"warning\": null,\n    \"system\": {\n      \"trains\": 1,\n      \"activeWarnings\": 0,\n      \"totalDecisions\": 0,\n      \"activeCameras\": 0,\n      \"uptimeSeconds\": 1234.56\n    }\n  }\n}\n```"
+            "description": "Get complete system state from State Manager.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"timestamp\": \"2026-07-15T...\",\n    \"station\": { \"id\": \"manggarai\", \"name\": \"Manggarai Station\" },\n    \"train\": {\n      \"id\": \"SF10-001\",\n      \"formation\": \"SF10\",\n      \"totalCars\": 10,\n      \"avgOccupancyRatio\": 0.72,\n      \"greenCars\": 3,\n      \"yellowCars\": 4,\n      \"redCars\": 3\n    },\n    \"occupancy\": {\n      \"avgOccupancyRatio\": 0.72,\n      \"greenCars\": 3,\n      \"yellowCars\": 4,\n      \"redCars\": 3\n    },\n    \"warning\": null,\n    \"system\": {\n      \"trains\": 1,\n      \"activeWarnings\": 0,\n      \"totalDecisions\": 0,\n      \"activeCameras\": 0,\n      \"uptimeSeconds\": 1234.56\n    }\n  }\n}\n```"
           },
           "response": []
         }
@@ -134,7 +136,8 @@
                   "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
                   "pm.test('Has cars array', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('cars'); pm.expect(d.data.cars).to.be.an('array'); });",
                   "pm.test('Has trainId', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('trainId'); });",
-                  "pm.test('Has timestamp', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('timestamp'); });"
+                  "pm.test('First car has occupancyRatio', () => { const d = pm.response.json(); pm.expect(d.data.cars[0]).to.have.property('occupancyRatio'); });",
+                  "pm.test('First car has densityIndicator', () => { const d = pm.response.json(); pm.expect(d.data.cars[0]).to.have.property('densityIndicator'); });"
                 ]
               }
             }
@@ -142,7 +145,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/v1/occupancy",
-            "description": "Get occupancy for all cars in current train.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"trainId\": \"SF10-001\",\n    \"station\": \"Manggarai\",\n    \"timestamp\": \"2026-07-15T...\",\n    \"cars\": [\n      {\n        \"carId\": 1,\n        \"occupancyPct\": 45.0,\n        \"status\": \"NORMAL\",\n        \"passengers\": 90,\n        \"capacity\": 200,\n        \"cameraStatus\": \"active\",\n        \"cameraId\": \"car01_cam01\",\n        \"riskScore\": 0.3\n      },\n      {\n        \"carId\": 2,\n        \"occupancyPct\": 22.5,\n        \"status\": \"LOW\",\n        \"passengers\": 45,\n        \"capacity\": 200,\n        \"cameraStatus\": \"active\",\n        \"cameraId\": \"car02_cam01\",\n        \"riskScore\": 0.1\n      }\n    ]\n  }\n}\n```"
+            "description": "Get spatial occupancy for all cars in current train.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"trainId\": \"SF10-001\",\n    \"station\": \"Manggarai\",\n    \"timestamp\": \"2026-07-15T...\",\n    \"cars\": [\n      {\n        \"carId\": 1,\n        \"occupancyRatio\": 0.88,\n        \"freeSpaceRatio\": 0.12,\n        \"densityIndicator\": \"RED\",\n        \"spatialOccupancyScore\": 0.88,\n        \"cameraStatus\": \"active\",\n        \"cameraId\": \"car01_cam01\",\n        \"riskScore\": 0.7,\n        \"prediction\": {\n          \"trend\": \"increasing\",\n          \"predictedOccupancyRatio\": 0.92,\n          \"confidence\": 0.85,\n          \"horizonMinutes\": 15\n        }\n      },\n      {\n        \"carId\": 2,\n        \"occupancyRatio\": 0.36,\n        \"freeSpaceRatio\": 0.64,\n        \"densityIndicator\": \"GREEN\",\n        \"spatialOccupancyScore\": 0.36,\n        \"cameraStatus\": \"active\",\n        \"cameraId\": \"car02_cam01\",\n        \"riskScore\": 0.1,\n        \"prediction\": {\n          \"trend\": \"stable\",\n          \"predictedOccupancyRatio\": 0.38,\n          \"confidence\": 0.80,\n          \"horizonMinutes\": 15\n        }\n      }\n    ]\n  }\n}\n```"
           },
           "response": []
         },
@@ -157,9 +160,8 @@
                   "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
                   "pm.test('Has car data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('carId'); });",
                   "pm.test('Car ID matches', () => { const d = pm.response.json(); pm.expect(d.data.carId).to.equal(4); });",
-                  "pm.test('Has occupancy percentage', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('occupancyPct'); });",
-                  "pm.test('Has status', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('status'); });",
-                  "pm.test('Has riskScore', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('riskScore'); });"
+                  "pm.test('Has occupancyRatio', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('occupancyRatio'); });",
+                  "pm.test('Has densityIndicator', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('densityIndicator'); });"
                 ]
               }
             }
@@ -171,12 +173,12 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "occupancy", "4"]
             },
-            "description": "Get occupancy for specific car (Car 4).\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"carId\": 4,\n    \"occupancyPct\": 92.0,\n    \"status\": \"FULL\",\n    \"passengers\": 184,\n    \"capacity\": 200,\n    \"riskScore\": 0.9,\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+            "description": "Get spatial occupancy for specific car (Car 4).\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"carId\": 4,\n    \"occupancyRatio\": 0.78,\n    \"freeSpaceRatio\": 0.22,\n    \"densityIndicator\": \"RED\",\n    \"spatialOccupancyScore\": 0.78,\n    \"riskScore\": 0.7,\n    \"cameraStatus\": \"active\",\n    \"cameraId\": \"car04_cam01\",\n    \"prediction\": {\n      \"trend\": \"increasing\",\n      \"predictedOccupancyRatio\": 0.85,\n      \"confidence\": 0.82\n    },\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
           },
           "response": []
         },
         {
-          "name": "GET /api/v1/occupancy/1 - Car 1 (LOW)",
+          "name": "GET /api/v1/occupancy/1 - Car 1",
           "event": [
             {
               "listen": "test",
@@ -196,7 +198,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "occupancy", "1"]
             },
-            "description": "Get occupancy for Car 1."
+            "description": "Get spatial occupancy for Car 1."
           },
           "response": []
         },
@@ -221,7 +223,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "occupancy", "10"]
             },
-            "description": "Get occupancy for Car 10."
+            "description": "Get spatial occupancy for Car 10."
           },
           "response": []
         }
@@ -247,7 +249,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/v1/recommendation",
-            "description": "Get current AI recommendation from Decision Engine.\n\nReturns recommendation only when there's significant occupancy imbalance (>30% difference).\n\nResponse (when recommendation exists):\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"action\": \"MOVE_PASSENGERS\",\n    \"fromCarId\": 4,\n    \"toCarId\": 1,\n    \"confidence\": 0.85,\n    \"reason\": \"Car 4 is 92% full. Car 1 is only 45% full.\"\n  }\n}\n```\n\nResponse (no recommendation):\n```json\n{\n  \"success\": true,\n  \"data\": null\n}\n```"
+            "description": "Get current AI redistribution recommendation.\n\nReturns recommendation only when there's significant occupancy imbalance (>12% difference).\n\nResponse (when recommendation exists):\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"fromCarId\": 6,\n    \"fromOccupancy\": 0.97,\n    \"congestionAvg\": 0.55,\n    \"highestOccupancy\": 0.97,\n    \"recommendedCars\": [10, 9, 8],\n    \"recommendations\": [\n      {\n        \"action\": \"REDISTRIBUTION\",\n        \"fromCarId\": 6,\n        \"toCarId\": 10,\n        \"confidence\": 0.92,\n        \"reason\": \"Gerbong 6 97% -> Gerbong 10 55%.\",\n        \"priority\": 1,\n        \"label\": \"#1 Best Choice\",\n        \"isWomenPriority\": false,\n        \"score\": 0.85\n      }\n    ],\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```\n\nResponse (no recommendation):\n```json\n{\n  \"success\": true,\n  \"data\": null\n}\n```"
           },
           "response": []
         }
@@ -282,7 +284,7 @@
                 { "key": "car_id", "value": "4", "description": "Filter by car ID (optional, 1-10)" }
               ]
             },
-            "description": "Get historical occupancy data.\n\nQuery params:\n- hours: number of hours to look back (default: 24)\n- car_id: filter by car ID (optional)\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"query\": { \"hours\": 24, \"carId\": 4 },\n    \"records\": [\n      {\n        \"timestamp\": \"2026-07-15T...\",\n        \"carId\": 4,\n        \"occupancy\": 0.72,\n        \"occupancyPct\": 72.0,\n        \"status\": \"HIGH\"\n      }\n    ],\n    \"summary\": {\n      \"averageOccupancy\": 0.65,\n      \"peakOccupancy\": 0.92,\n      \"peakTime\": \"08:30\",\n      \"totalRecords\": 24\n    }\n  }\n}\n```"
+            "description": "Get historical spatial occupancy data.\n\nQuery params:\n- hours: number of hours to look back (default: 24)\n- car_id: filter by car ID (optional)\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"query\": { \"hours\": 24, \"carId\": 4 },\n    \"records\": [\n      {\n        \"timestamp\": \"2026-07-15T...\",\n        \"carId\": 4,\n        \"occupancyRatio\": 0.72,\n        \"freeSpaceRatio\": 0.28,\n        \"densityIndicator\": \"RED\"\n      }\n    ],\n    \"summary\": {\n      \"averageOccupancy\": 0.65,\n      \"peakOccupancy\": 0.92,\n      \"peakTime\": \"08:30\",\n      \"totalRecords\": 24\n    }\n  }\n}\n```"
           },
           "response": []
         },
@@ -339,7 +341,7 @@
                 { "key": "hours", "value": "24", "description": "Hours to look back (default: 24)" }
               ]
             },
-            "description": "Get warning history.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"warnings\": [\n      {\n        \"id\": \"SF10-001-4-HIGH_OCCUPANCY\",\n        \"timestamp\": \"2026-07-15T...\",\n        \"warningType\": \"HIGH_OCCUPANCY\",\n        \"severity\": \"WARNING\",\n        \"carId\": 4,\n        \"message\": \"Car 4 is HIGH (92.0%)\",\n        \"trainId\": \"SF10-001\",\n        \"isActive\": true\n      }\n    ],\n    \"total\": 2,\n    \"hours\": 24,\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+            "description": "Get warning history.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"warnings\": [\n      {\n        \"id\": \"SF10-001-4-RED_DENSITY\",\n        \"timestamp\": \"2026-07-15T...\",\n        \"warningType\": \"RED_DENSITY\",\n        \"severity\": \"CRITICAL\",\n        \"carId\": 4,\n        \"message\": \"Car 4 is RED density (occupancy: 78%)\",\n        \"trainId\": \"SF10-001\",\n        \"isActive\": true\n      }\n    ],\n    \"total\": 2,\n    \"hours\": 24,\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
           },
           "response": []
         }
@@ -358,7 +360,6 @@
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
                   "pm.test('Has train config', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('train'); });",
-                  "pm.test('Has ai config', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('ai'); });",
                   "pm.test('Has cameras config', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('cameras'); });",
                   "pm.test('Total cars is 10', () => { const d = pm.response.json(); pm.expect(d.data.train.totalCars).to.equal(10); });"
                 ]
@@ -368,7 +369,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/v1/config",
-            "description": "Get current system configuration.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"train\": {\n      \"formation\": \"SF10\",\n      \"totalCars\": 10,\n      \"capacityPerCar\": 200\n    },\n    \"occupancy\": {\n      \"lowThreshold\": 0.4,\n      \"normalThreshold\": 0.7,\n      \"highThreshold\": 0.9,\n      \"fullThreshold\": 1.0\n    },\n    \"cameras\": [\n      { \"id\": \"car01_cam01\", \"type\": \"cabin\", \"zone\": \"car_1\", \"carMapping\": 1, \"status\": \"online\" },\n      { \"id\": \"car01_cam02\", \"type\": \"cabin\", \"zone\": \"car_1\", \"carMapping\": 1, \"status\": \"online\" },\n      ...\n    ],\n    \"ai\": {\n      \"model\": \"YOLO11s\",\n      \"confidence\": 0.5,\n      \"imageSize\": 640\n    }\n  }\n}\n```"
+            "description": "Get current system configuration.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"train\": {\n      \"formation\": \"SF10\",\n      \"totalCars\": 10,\n      \"capacityPerCar\": 200,\n      \"floorAreaM2\": 42.0\n    },\n    \"cameras\": [\n      { \"id\": \"car01_cam01\", \"type\": \"ceiling_fisheye\", \"zone\": \"car_1_front_left\", \"carMapping\": 1, \"status\": \"online\" },\n      { \"id\": \"car01_cam02\", \"type\": \"ceiling_fisheye\", \"zone\": \"car_1_front_right\", \"carMapping\": 1, \"status\": \"online\" },\n      { \"id\": \"car01_cam03\", \"type\": \"ceiling_fisheye\", \"zone\": \"car_1_rear_left\", \"carMapping\": 1, \"status\": \"online\" },\n      { \"id\": \"car01_cam04\", \"type\": \"ceiling_fisheye\", \"zone\": \"car_1_rear_right\", \"carMapping\": 1, \"status\": \"online\" },\n      ...\n    ],\n    \"ai\": {\n      \"model\": \"Spatial Segmentation\",\n      \"confidence\": 0.5,\n      \"imageSize\": 640\n    },\n    \"density\": {\n      \"greenThreshold\": 0.6,\n      \"yellowThreshold\": 0.3,\n      \"redThreshold\": 0.0\n    }\n  }\n}\n```"
           },
           "response": []
         },
@@ -382,7 +383,7 @@
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
                   "pm.test('Has mappings', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('mappings'); });",
-                  "pm.test('Has 20 camera mappings', () => { const d = pm.response.json(); pm.expect(d.data.mappings.length).to.equal(20); });"
+                  "pm.test('Has 40 camera mappings', () => { const d = pm.response.json(); pm.expect(d.data.mappings.length).to.equal(40); });"
                 ]
               }
             }
@@ -390,7 +391,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/v1/config/lookup-table",
-            "description": "Get camera to train car mapping lookup table.\n\nResponse (20 cameras, 2 per car):\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"mappings\": [\n      { \"cameraId\": \"car01_cam01\", \"zone\": \"car_1\", \"carId\": 1 },\n      { \"cameraId\": \"car01_cam02\", \"zone\": \"car_1\", \"carId\": 1 },\n      { \"cameraId\": \"car02_cam01\", \"zone\": \"car_2\", \"carId\": 2 },\n      { \"cameraId\": \"car02_cam02\", \"zone\": \"car_2\", \"carId\": 2 },\n      ...\n      { \"cameraId\": \"car10_cam01\", \"zone\": \"car_10\", \"carId\": 10 },\n      { \"cameraId\": \"car10_cam02\", \"zone\": \"car_10\", \"carId\": 10 }\n    ]\n  }\n}\n```"
+            "description": "Get camera to train car mapping lookup table.\n\nResponse (40 cameras, 4 per car):\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"mappings\": [\n      { \"cameraId\": \"car01_cam01\", \"zone\": \"car_1_front_left\", \"carId\": 1, \"type\": \"ceiling_fisheye\", \"position\": \"front_left\" },\n      { \"cameraId\": \"car01_cam02\", \"zone\": \"car_1_front_right\", \"carId\": 1, \"type\": \"ceiling_fisheye\", \"position\": \"front_right\" },\n      { \"cameraId\": \"car01_cam03\", \"zone\": \"car_1_rear_left\", \"carId\": 1, \"type\": \"ceiling_fisheye\", \"position\": \"rear_left\" },\n      { \"cameraId\": \"car01_cam04\", \"zone\": \"car_1_rear_right\", \"carId\": 1, \"type\": \"ceiling_fisheye\", \"position\": \"rear_right\" },\n      ...\n      { \"cameraId\": \"car10_cam04\", \"zone\": \"car_10_rear_right\", \"carId\": 10, \"type\": \"ceiling_fisheye\", \"position\": \"rear_right\" }\n    ]\n  }\n}\n```"
           },
           "response": []
         }
@@ -450,7 +451,7 @@
                 "value": "application/json"
               }
             ],
-            "description": "Load 'empty' scenario - empty train.\n\nResets state and loads empty train configuration.\nBroadcasts occupancy updates for all cars via WebSocket.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"scenario\": \"empty\",\n    \"description\": \"Empty train scenario\",\n    \"carsLoaded\": 10,\n    \"message\": \"Scenario 'empty' loaded\",\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+            "description": "Load 'empty' scenario - empty train.\n\nAll cars have 0% occupancy (GREEN indicator).\nBroadcasts PipelineState for all cars via WebSocket.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"scenario\": \"empty\",\n    \"description\": \"Empty train - no passengers\",\n    \"carsLoaded\": 10,\n    \"message\": \"Scenario 'empty' loaded\",\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
           },
           "response": []
         },
@@ -463,8 +464,7 @@
                 "exec": [
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
-                  "pm.test('Scenario is normal', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('scenario'); pm.expect(d.data.scenario).to.equal('normal'); });",
-                  "pm.test('Has carsLoaded', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('carsLoaded'); });"
+                  "pm.test('Scenario is normal', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('scenario'); pm.expect(d.data.scenario).to.equal('normal'); });"
                 ]
               }
             }
@@ -478,7 +478,7 @@
                 "value": "application/json"
               }
             ],
-            "description": "Load 'normal' scenario - normal operation.\n\n10 cars with normal occupancy levels (40-70%).\nBroadcasts occupancy updates for all cars via WebSocket.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"scenario\": \"normal\",\n    \"description\": \"Normal operation scenario\",\n    \"carsLoaded\": 10,\n    \"message\": \"Scenario 'normal' loaded\",\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+            "description": "Load 'normal' scenario - normal operation.\n\n10 cars with GREEN/YELLOW indicators (29-42% occupancy).\nBroadcasts PipelineState for all cars via WebSocket."
           },
           "response": []
         },
@@ -491,8 +491,7 @@
                 "exec": [
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
-                  "pm.test('Scenario is peak_hour', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('scenario'); pm.expect(d.data.scenario).to.equal('peak_hour'); });",
-                  "pm.test('Has carsLoaded', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('carsLoaded'); });"
+                  "pm.test('Scenario is peak_hour', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('scenario'); pm.expect(d.data.scenario).to.equal('peak_hour'); });"
                 ]
               }
             }
@@ -506,7 +505,7 @@
                 "value": "application/json"
               }
             ],
-            "description": "Load 'peak_hour' scenario - rush hour congestion.\n\n10 cars with high occupancy (40-100%). Some cars FULL.\nTriggers warnings and recommendations via WebSocket.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"scenario\": \"peak_hour\",\n    \"description\": \"Rush hour congestion scenario\",\n    \"carsLoaded\": 10,\n    \"message\": \"Scenario 'peak_hour' loaded\",\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+            "description": "Load 'peak_hour' scenario - rush hour congestion.\n\n10 cars with mixed indicators: GREEN/YELLOW/RED (55-97% occupancy).\nTriggers warnings and redistribution recommendations via WebSocket."
           },
           "response": []
         },
@@ -519,8 +518,7 @@
                 "exec": [
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
-                  "pm.test('Scenario is holiday', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('scenario'); pm.expect(d.data.scenario).to.equal('holiday'); });",
-                  "pm.test('Has carsLoaded', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('carsLoaded'); });"
+                  "pm.test('Scenario is holiday', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('scenario'); pm.expect(d.data.scenario).to.equal('holiday'); });"
                 ]
               }
             }
@@ -534,7 +532,61 @@
                 "value": "application/json"
               }
             ],
-            "description": "Load 'holiday' scenario - holiday light traffic.\n\n10 cars with low occupancy (10-27%).\nBroadcasts occupancy updates for all cars via WebSocket.\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"scenario\": \"holiday\",\n    \"description\": \"Holiday light traffic scenario\",\n    \"carsLoaded\": 10,\n    \"message\": \"Scenario 'holiday' loaded\",\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
+            "description": "Load 'holiday' scenario - holiday light traffic.\n\n10 cars with GREEN indicators (7-22% occupancy).\nBroadcasts PipelineState for all cars via WebSocket."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/simulation/scenario/imbalanced - Imbalanced",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Scenario is imbalanced', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('scenario'); pm.expect(d.data.scenario).to.equal('imbalanced'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/simulation/scenario/imbalanced",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Load 'imbalanced' scenario - heavy imbalance.\n\nCars 1-3 are RED (90-97%), Cars 4-10 are GREEN (5-48%).\nTriggers strong redistribution recommendation and door automation."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/v1/simulation/scenario/emergency - Emergency",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
+                  "pm.test('Scenario is emergency', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('scenario'); pm.expect(d.data.scenario).to.equal('emergency'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/simulation/scenario/emergency",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Load 'emergency' scenario - multiple RED cars.\n\nAll 10 cars are RED (75-99% occupancy).\nMaximum warnings and emergency redistribution."
           },
           "response": []
         },
@@ -560,7 +612,7 @@
                 "value": "application/json"
               }
             ],
-            "description": "Test invalid scenario name.\n\nShould return success: false with error message.\n\nResponse:\n```json\n{\n  \"success\": false,\n  \"error\": \"Invalid scenario. Valid: ['empty', 'normal', 'peak_hour', 'holiday']\"\n}\n```"
+            "description": "Test invalid scenario name.\n\nShould return success: false with error message.\n\nResponse:\n```json\n{\n  \"success\": false,\n  \"error\": \"Invalid scenario. Valid: ['empty', 'normal', 'peak_hour', 'holiday', 'imbalanced', 'emergency']\"\n}\n```"
           },
           "response": []
         },
@@ -574,8 +626,7 @@
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
                   "pm.test('Has active field', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('active'); });",
-                  "pm.test('Has uptimeSeconds', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('uptimeSeconds'); });",
-                  "pm.test('Has timestamp', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('timestamp'); });"
+                  "pm.test('Has uptimeSeconds', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('uptimeSeconds'); });"
                 ]
               }
             }
@@ -590,10 +641,11 @@
       ]
     },
     {
-      "name": "08 - Frame Upload (YOLO Detection)",
+      "name": "08 - Frame Upload (Spatial Segmentation)",
+      "description": "Upload 4 fisheye camera frames per car for spatial occupancy analysis.\n\nPipeline: 4 frames → Fisheye Undistort → Spatial Segmentation → Occupancy Grid → Fusion → Density Classification → PipelineState",
       "item": [
         {
-          "name": "POST /api/v1/frame - Upload Frame car01_cam01",
+          "name": "POST /api/v1/frame - Upload 4 Frames Car 4",
           "event": [
             {
               "listen": "test",
@@ -601,11 +653,12 @@
                 "exec": [
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
-                  "pm.test('Has frame data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('persons_detected'); });",
-                  "pm.test('Has camera_id', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('camera_id'); pm.expect(d.data.camera_id).to.equal('car01_cam01'); });",
-                  "pm.test('Has detection_source is yolo', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('detection_source'); pm.expect(d.data.detection_source).to.equal('yolo'); });",
-                  "pm.test('Has occupancy data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('occupancy'); });",
-                  "pm.test('Has prediction data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('prediction'); });"
+                  "pm.test('Has PipelineState', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('car_id'); });",
+                  "pm.test('Has occupancy_ratio', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('occupancy_ratio'); });",
+                  "pm.test('Has density_indicator', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('density_indicator'); });",
+                  "pm.test('Has door_action', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('door_action'); });",
+                  "pm.test('Has cales_score', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('cales_score'); });",
+                  "pm.test('Car ID is car_04', () => { const d = pm.response.json(); pm.expect(d.data.car_id).to.equal('car_04'); });"
                 ]
               }
             }
@@ -613,11 +666,11 @@
           "request": {
             "method": "POST",
             "url": {
-              "raw": "{{baseUrl}}/api/v1/frame?camera_id=car01_cam01&train_id=SF10-001",
+              "raw": "{{baseUrl}}/api/v1/frame?camera_ids=car04_cam01,car04_cam02,car04_cam03,car04_cam04&train_id=SF10-001",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "frame"],
               "query": [
-                { "key": "camera_id", "value": "car01_cam01", "description": "Camera identifier (car01_cam01 - car10_cam02)" },
+                { "key": "camera_ids", "value": "car04_cam01,car04_cam02,car04_cam03,car04_cam04", "description": "Comma-separated camera IDs (4 cameras per car)" },
                 { "key": "train_id", "value": "SF10-001", "description": "Train identifier" }
               ]
             },
@@ -632,18 +685,37 @@
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "file",
+                  "key": "files",
                   "type": "file",
-                  "src": ""
+                  "src": "",
+                  "description": "Upload 4 fisheye camera images (JPEG/PNG)"
+                },
+                {
+                  "key": "camera_ids",
+                  "value": "car04_cam01,car04_cam02,car04_cam03,car04_cam04",
+                  "type": "text",
+                  "description": "Camera IDs matching the uploaded files"
+                },
+                {
+                  "key": "station_id",
+                  "value": "manggarai",
+                  "type": "text",
+                  "description": "Current station ID"
+                },
+                {
+                  "key": "train_id",
+                  "value": "SF10-001",
+                  "type": "text",
+                  "description": "Train identifier"
                 }
               ]
             },
-            "description": "Upload camera frame from Car 1 front camera.\n\nRequired Header: X-API-Key: themis-unity-key-2026\nParams: camera_id=car01_cam01, train_id=SF10-001\nBody: multipart/form-data with 'file' field (JPEG/PNG image)\n\nFull AI Pipeline (YOLO ONLY detection):\n1. Receive JPEG frame\n2. Run YOLO11s detection (person class, conf>=0.5)\n3. Calculate occupancy from YOLO results\n4. Fuse with existing data (FusionEngine)\n5. Predict trend (CALESEngine)\n6. Generate warning (DecisionEngine)\n7. Update State Manager\n8. Broadcast via WebSocket\n\nResponse:\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"frame_id\": \"frame_1721056800.123\",\n    \"camera_id\": \"car01_cam01\",\n    \"station_id\": \"unknown\",\n    \"train_id\": \"SF10-001\",\n    \"timestamp\": \"2026-07-15T...\",\n    \"status\": \"processed\",\n    \"persons_detected\": 5,\n    \"detection_source\": \"yolo\",\n    \"occupancy\": {\n      \"person_count\": 5,\n      \"capacity\": 200,\n      \"occupancy_percentage\": 2.5,\n      \"status\": \"LOW\",\n      \"risk_score\": 0.1,\n      \"car_id\": 1\n    },\n    \"prediction\": {\n      \"predicted_occupancy\": 3.1,\n      \"risk_score\": 0.1,\n      \"confidence\": 0.7,\n      \"horizon_minutes\": 15\n    },\n    \"recommendation\": null,\n    \"warning\": null\n  }\n}\n```"
+            "description": "Upload 4 fisheye camera frames from Car 4.\n\nRequired Header: X-API-Key: themis-unity-key-2026\nBody: multipart/form-data with 4 'files' fields (JPEG/PNG images)\n\nFull AI Pipeline:\n1. Receive 4 JPEG/PNG frames\n2. Fisheye undistortion\n3. Spatial Occupancy Segmentation\n4. Occupancy Grid Generation\n5. Fusion (4 grids → 1 car map)\n6. Density Classification (GREEN/YELLOW/RED)\n7. CALES (Bogie Health)\n8. Redistribution Analysis\n9. Door Logic\n10. Announcement Generation\n11. PipelineState Construction\n12. WebSocket Broadcast\n\nResponse (PipelineState):\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"car_id\": \"car_04\",\n    \"occupancy_ratio\": 0.78,\n    \"free_space_ratio\": 0.22,\n    \"density_indicator\": \"RED\",\n    \"spatial_occupancy_score\": 0.78,\n    \"recommended_target\": \"car_08\",\n    \"door_action\": \"OPEN_MIDDLE\",\n    \"announcement\": \"Carriage 8 has available capacity (88% free). Passengers in Carriage 4 are advised to move to Carriage 8.\",\n    \"cales_score\": 0.45,\n    \"health_index\": 55.0,\n    \"damage_multiplier\": 1.5,\n    \"inspection_priority\": 2,\n    \"recommended_action\": \"SCHEDULE_INSPECTION\",\n    \"timestamp\": \"2026-07-15T...\"\n  }\n}\n```"
           },
           "response": []
         },
         {
-          "name": "POST /api/v1/frame - Upload Frame car03_cam01",
+          "name": "POST /api/v1/frame - Upload 4 Frames Car 1",
           "event": [
             {
               "listen": "test",
@@ -651,9 +723,8 @@
                 "exec": [
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
-                  "pm.test('Has frame data', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('persons_detected'); });",
-                  "pm.test('Camera ID is car03_cam01', () => { const d = pm.response.json(); pm.expect(d.data.camera_id).to.equal('car03_cam01'); });",
-                  "pm.test('Detection source is yolo', () => { const d = pm.response.json(); pm.expect(d.data.detection_source).to.equal('yolo'); });"
+                  "pm.test('Has PipelineState', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('car_id'); });",
+                  "pm.test('Car ID is car_01', () => { const d = pm.response.json(); pm.expect(d.data.car_id).to.equal('car_01'); });"
                 ]
               }
             }
@@ -661,11 +732,11 @@
           "request": {
             "method": "POST",
             "url": {
-              "raw": "{{baseUrl}}/api/v1/frame?camera_id=car03_cam01&train_id=SF10-001",
+              "raw": "{{baseUrl}}/api/v1/frame?camera_ids=car01_cam01,car01_cam02,car01_cam03,car01_cam04&train_id=SF10-001",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "frame"],
               "query": [
-                { "key": "camera_id", "value": "car03_cam01", "description": "Car 3 front camera" },
+                { "key": "camera_ids", "value": "car01_cam01,car01_cam02,car01_cam03,car01_cam04", "description": "Car 1 cameras (4 ceiling fisheye)" },
                 { "key": "train_id", "value": "SF10-001", "description": "Train identifier" }
               ]
             },
@@ -680,18 +751,29 @@
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "file",
+                  "key": "files",
                   "type": "file",
-                  "src": ""
+                  "src": "",
+                  "description": "Upload 4 fisheye camera images for Car 1"
+                },
+                {
+                  "key": "camera_ids",
+                  "value": "car01_cam01,car01_cam02,car01_cam03,car01_cam04",
+                  "type": "text"
+                },
+                {
+                  "key": "train_id",
+                  "value": "SF10-001",
+                  "type": "text"
                 }
               ]
             },
-            "description": "Upload frame from Car 3 front camera.\n\nUse this to test different car detections.\n\nResponse includes YOLO detection results for car 3."
+            "description": "Upload 4 fisheye camera frames from Car 1.\n\nUse this to test different car detections."
           },
           "response": []
         },
         {
-          "name": "POST /api/v1/frame - Upload Frame car10_cam02",
+          "name": "POST /api/v1/frame - Upload 4 Frames Car 10",
           "event": [
             {
               "listen": "test",
@@ -699,7 +781,8 @@
                 "exec": [
                   "pm.test('Status is 200', () => pm.response.to.have.status(200));",
                   "pm.test('Has success field', () => { const d = pm.response.json(); pm.expect(d).to.have.property('success'); pm.expect(d.success).to.be.true; });",
-                  "pm.test('Camera ID is car10_cam02', () => { const d = pm.response.json(); pm.expect(d.data.camera_id).to.equal('car10_cam02'); });"
+                  "pm.test('Has PipelineState', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('car_id'); });",
+                  "pm.test('Car ID is car_10', () => { const d = pm.response.json(); pm.expect(d.data.car_id).to.equal('car_10'); });"
                 ]
               }
             }
@@ -707,11 +790,11 @@
           "request": {
             "method": "POST",
             "url": {
-              "raw": "{{baseUrl}}/api/v1/frame?camera_id=car10_cam02&train_id=SF10-001",
+              "raw": "{{baseUrl}}/api/v1/frame?camera_ids=car10_cam01,car10_cam02,car10_cam03,car10_cam04&train_id=SF10-001",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "frame"],
               "query": [
-                { "key": "camera_id", "value": "car10_cam02", "description": "Car 10 rear camera" },
+                { "key": "camera_ids", "value": "car10_cam01,car10_cam02,car10_cam03,car10_cam04", "description": "Car 10 cameras (4 ceiling fisheye)" },
                 { "key": "train_id", "value": "SF10-001", "description": "Train identifier" }
               ]
             },
@@ -726,13 +809,24 @@
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "file",
+                  "key": "files",
                   "type": "file",
-                  "src": ""
+                  "src": "",
+                  "description": "Upload 4 fisheye camera images for Car 10"
+                },
+                {
+                  "key": "camera_ids",
+                  "value": "car10_cam01,car10_cam02,car10_cam03,car10_cam04",
+                  "type": "text"
+                },
+                {
+                  "key": "train_id",
+                  "value": "SF10-001",
+                  "type": "text"
                 }
               ]
             },
-            "description": "Upload frame from Car 10 rear camera.\n\nUse this to test the last car detection.\n\nResponse includes YOLO detection results for car 10."
+            "description": "Upload 4 fisheye camera frames from Car 10.\n\nUse this to test the last car detection."
           },
           "response": []
         },
@@ -752,11 +846,11 @@
           "request": {
             "method": "POST",
             "url": {
-              "raw": "{{baseUrl}}/api/v1/frame?camera_id=car01_cam01&train_id=SF10-001",
+              "raw": "{{baseUrl}}/api/v1/frame?camera_ids=car04_cam01,car04_cam02,car04_cam03,car04_cam04&train_id=SF10-001",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "frame"],
               "query": [
-                { "key": "camera_id", "value": "car01_cam01" },
+                { "key": "camera_ids", "value": "car04_cam01,car04_cam02,car04_cam03,car04_cam04" },
                 { "key": "train_id", "value": "SF10-001" }
               ]
             },
@@ -764,7 +858,7 @@
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "file",
+                  "key": "files",
                   "type": "file",
                   "src": ""
                 }
@@ -780,11 +874,11 @@
       "name": "09 - WebSocket",
       "item": [
         {
-          "name": "WS /ws - Real-time Events",
+          "name": "WS /ws - Real-time PipelineState",
           "request": {
             "method": "GET",
             "url": "ws://localhost:8000/ws",
-            "description": "WebSocket endpoint for real-time updates.\n\nConnect using WebSocket client (Postman WS tab, wscat, or browser).\n\nEvents received (all data is camelCase):\n\n1. occupancy_updated\n```json\n{\n  \"type\": \"occupancy_updated\",\n  \"trainId\": \"SF10-001\",\n  \"timestamp\": \"2026-07-15T...\",\n  \"data\": {\n    \"car_id\": 1,\n    \"person_count\": 5,\n    \"occupancy_percentage\": 2.5,\n    \"status\": \"LOW\"\n  }\n}\n```\n\n2. prediction_updated\n```json\n{\n  \"type\": \"prediction_updated\",\n  \"data\": {\n    \"car_id\": 1,\n    \"prediction\": {\n      \"predicted_occupancy\": 3.1,\n      \"risk_score\": 0.1,\n      \"confidence\": 0.7\n    }\n  }\n}\n```\n\n3. recommendation_changed\n```json\n{\n  \"type\": \"recommendation_changed\",\n  \"data\": {\n    \"recommendation\": {\n      \"action\": \"MOVE_PASSENGERS\",\n      \"from_car_id\": 4,\n      \"to_car_id\": 1,\n      \"confidence\": 0.85,\n      \"reason\": \"Car 4 is 92% full...\"\n    }\n  }\n}\n```\n\n4. warning_updated\n```json\n{\n  \"type\": \"warning_updated\",\n  \"data\": {\n    \"warning\": {\n      \"train_id\": \"SF10-001\",\n      \"car_id\": 4,\n      \"warning_type\": \"HIGH_OCCUPANCY\",\n      \"severity\": \"WARNING\",\n      \"message\": \"Car 4 is HIGH (92.0%)\",\n      \"is_active\": true\n    }\n  }\n}\n```\n\n5. camera_status_updated\n```json\n{\n  \"type\": \"camera_status_updated\",\n  \"data\": {\n    \"camera_id\": \"car01_cam01\",\n    \"status\": \"active\"\n  }\n}\n```\n\n6. system_health_updated\n7. simulation_reset"
+            "description": "WebSocket endpoint for real-time updates.\n\nConnect using WebSocket client (Postman WS tab, wscat, or browser).\n\nEvents received:\n\n1. pipeline_state_updated (main V6 event)\n```json\n{\n  \"type\": \"pipeline_state_updated\",\n  \"train_id\": \"SF10-001\",\n  \"timestamp\": \"2026-07-15T...\",\n  \"data\": {\n    \"car_id\": \"car_04\",\n    \"occupancy_ratio\": 0.78,\n    \"free_space_ratio\": 0.22,\n    \"density_indicator\": \"RED\",\n    \"spatial_occupancy_score\": 0.78,\n    \"recommended_target\": \"car_08\",\n    \"door_action\": \"OPEN_MIDDLE\",\n    \"announcement\": \"Carriage 8 has available capacity...\",\n    \"cales_score\": 0.45,\n    \"health_index\": 55.0,\n    \"damage_multiplier\": 1.5,\n    \"inspection_priority\": 2,\n    \"recommended_action\": \"SCHEDULE_INSPECTION\"\n  }\n}\n```\n\n2. warning_updated\n```json\n{\n  \"type\": \"warning_updated\",\n  \"data\": {\n    \"warning\": {\n      \"train_id\": \"SF10-001\",\n      \"car_id\": 4,\n      \"warning_type\": \"RED_DENSITY\",\n      \"severity\": \"CRITICAL\",\n      \"message\": \"Car 4 is RED density (occupancy: 78%)\",\n      \"is_active\": true\n    }\n  }\n}\n```\n\n3. camera_status_updated\n```json\n{\n  \"type\": \"camera_status_updated\",\n  \"data\": {\n    \"camera_id\": \"car04_cam01\",\n    \"status\": \"online\"\n  }\n}\n```\n\n4. simulation_reset\n5. system_health_updated"
           },
           "response": []
         }
@@ -834,7 +928,7 @@
                 "value": "application/json"
               }
             ],
-            "description": "Step 2: Load peak hour scenario to generate data."
+            "description": "Step 2: Load peak hour scenario to generate spatial occupancy data."
           },
           "response": []
         },
@@ -845,7 +939,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Has car data', () => { const d = pm.response.json(); pm.expect(d.data.cars.length).to.be.greaterThan(0); });"
+                  "pm.test('Has car data', () => { const d = pm.response.json(); pm.expect(d.data.cars.length).to.be.greaterThan(0); });",
+                  "pm.test('First car has densityIndicator', () => { const d = pm.response.json(); pm.expect(d.data.cars[0]).to.have.property('densityIndicator'); });"
                 ]
               }
             }
@@ -853,7 +948,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/v1/occupancy",
-            "description": "Step 3: Verify occupancy data loaded from scenario."
+            "description": "Step 3: Verify spatial occupancy data loaded from scenario."
           },
           "response": []
         },
@@ -872,7 +967,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/v1/recommendation",
-            "description": "Step 4: Check if AI generated a recommendation."
+            "description": "Step 4: Check if AI generated a redistribution recommendation."
           },
           "response": []
         },
@@ -891,7 +986,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/v1/history/warnings",
-            "description": "Step 5: Check if any warnings were generated."
+            "description": "Step 5: Check if any RED/YELLOW density warnings were generated."
           },
           "response": []
         },
@@ -902,7 +997,8 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Has system state', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('train'); });"
+                  "pm.test('Has system state', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('train'); });",
+                  "pm.test('Has redCars count', () => { const d = pm.response.json(); pm.expect(d.data.occupancy).to.have.property('redCars'); });"
                 ]
               }
             }
@@ -910,18 +1006,19 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/v1/state",
-            "description": "Step 6: Verify full system state."
+            "description": "Step 6: Verify full system state with density indicator counts."
           },
           "response": []
         },
         {
-          "name": "Step 7: Check Camera Lookup Table",
+          "name": "Step 7: Check Camera Lookup Table (40 cameras)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('Has 20 cameras', () => { const d = pm.response.json(); pm.expect(d.data.mappings.length).to.equal(20); });"
+                  "pm.test('Has 40 cameras', () => { const d = pm.response.json(); pm.expect(d.data.mappings.length).to.equal(40); });",
+                  "pm.test('First camera is ceiling_fisheye', () => { const d = pm.response.json(); pm.expect(d.data.mappings[0].type).to.equal('ceiling_fisheye'); });"
                 ]
               }
             }
@@ -929,12 +1026,60 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/api/v1/config/lookup-table",
-            "description": "Step 7: Verify 20 camera mappings."
+            "description": "Step 7: Verify 40 camera mappings (4 ceiling fisheye per car)."
           },
           "response": []
         },
         {
-          "name": "Step 8: Reset",
+          "name": "Step 8: Upload Frame Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Frame upload returns PipelineState', () => { const d = pm.response.json(); pm.expect(d.data).to.have.property('density_indicator'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/frame?camera_ids=car04_cam01,car04_cam02,car04_cam03,car04_cam04&train_id=SF10-001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "frame"],
+              "query": [
+                { "key": "camera_ids", "value": "car04_cam01,car04_cam02,car04_cam03,car04_cam04" },
+                { "key": "train_id", "value": "SF10-001" }
+              ]
+            },
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "camera_ids",
+                  "value": "car04_cam01,car04_cam02,car04_cam03,car04_cam04",
+                  "type": "text"
+                }
+              ]
+            },
+            "description": "Step 8: Test frame upload and verify PipelineState response."
+          },
+          "response": []
+        },
+        {
+          "name": "Step 9: Reset",
           "event": [
             {
               "listen": "test",
@@ -954,7 +1099,7 @@
                 "value": "application/json"
               }
             ],
-            "description": "Step 8: Reset simulation for next test."
+            "description": "Step 9: Reset simulation for next test."
           },
           "response": []
         }

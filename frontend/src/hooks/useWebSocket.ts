@@ -17,56 +17,72 @@ function handleMessage(message: WebSocketMessage) {
   const ts = message.timestamp || new Date().toISOString();
 
   switch (message.type) {
-    case "occupancy_updated": {
+    case "pipeline_state_updated":
+    case "spatial_occupancy_updated": {
       if (message.data) {
-        const currentCars = [...store.cars];
-        const carIndex = currentCars.findIndex(
-          (c) => c.carId === message.data!.car_id
-        );
-        if (carIndex >= 0) {
-          currentCars[carIndex] = {
-            ...currentCars[carIndex],
-            occupancyPct:
-              (message.data.occupancy_percentage as number) ??
-              currentCars[carIndex].occupancyPct,
-            passengers:
-              (message.data.person_count as number) ??
-              currentCars[carIndex].passengers,
-            status:
-              (message.data.status as string) ?? currentCars[carIndex].status,
+        const d = message.data;
+        const carIdNum = typeof d.car_id === "string"
+          ? parseInt(d.car_id.replace(/\D/g, ""), 10)
+          : (d.car_id as number);
+
+        if (carIdNum > 0) {
+          const currentCars = [...store.cars];
+          const idx = currentCars.findIndex((c) => c.carId === carIdNum);
+
+          const updated: import("@/types").CarSpatialOccupancy = {
+            carId: carIdNum,
+            occupancyRatio: (d.occupancy_ratio as number) ?? 0,
+            freeSpaceRatio: (d.free_space_ratio as number) ?? 1,
+            densityIndicator: (d.density_indicator as "GREEN" | "YELLOW" | "RED") ?? "GREEN",
+            spatialOccupancyScore: (d.spatial_occupancy_score as number) ?? 0,
+            cameraStatus: "active",
+            riskScore: (d.occupancy_ratio as number) ?? 0,
+            prediction: (d.prediction as import("@/types").CarSpatialOccupancy["prediction"]) ?? null,
           };
+
+          if (idx >= 0) {
+            currentCars[idx] = updated;
+          } else {
+            currentCars.push(updated);
+          }
           store.setCars(currentCars);
         }
+
         store.addTimelineEvent({
-          id: `occ-${Date.now()}`,
+          id: `pipe-${Date.now()}`,
           timestamp: ts,
           type: "occupancy",
-          message: `Car ${message.data.car_id}: ${(message.data.occupancy_percentage as string | number) ?? "?"}% occupancy`,
-          severity: "info",
+          message: `Car ${d.car_id}: ${(((d.occupancy_ratio as number) ?? 0) * 100).toFixed(0)}% occupancy [${d.density_indicator ?? "GREEN"}]`,
+          severity: d.density_indicator === "RED" ? "warning" : "info",
         });
       }
       break;
     }
 
-    case "prediction_updated": {
+    case "occupancy_updated": {
       if (message.data) {
-        const prediction = (message.data.prediction as Record<string, unknown>) || {};
-        const currentCars = [...store.cars];
-        const idx = currentCars.findIndex(
-          (c) => c.carId === message.data!.car_id
-        );
-        if (idx >= 0) {
-          currentCars[idx] = {
-            ...currentCars[idx],
-            prediction: {
-              trend: (prediction.trend as string) ?? "stable",
-              predictedOccupancy:
-                (prediction.predictedOccupancy as number) ?? currentCars[idx].occupancyPct,
-              confidence: (prediction.confidence as number) ?? 0,
-            },
-          };
-          store.setCars(currentCars);
+        const d = message.data;
+        const carIdNum = d.car_id as number;
+        if (carIdNum > 0) {
+          const currentCars = [...store.cars];
+          const idx = currentCars.findIndex((c) => c.carId === carIdNum);
+          if (idx >= 0) {
+            currentCars[idx] = {
+              ...currentCars[idx],
+              occupancyRatio: (d.occupancy_ratio as number) ?? currentCars[idx].occupancyRatio,
+              freeSpaceRatio: (d.free_space_ratio as number) ?? currentCars[idx].freeSpaceRatio,
+              densityIndicator: (d.density_indicator as "GREEN" | "YELLOW" | "RED") ?? currentCars[idx].densityIndicator,
+            };
+            store.setCars(currentCars);
+          }
         }
+        store.addTimelineEvent({
+          id: `occ-${Date.now()}`,
+          timestamp: ts,
+          type: "occupancy",
+          message: `Car ${d.car_id}: ${((d.occupancy_ratio as number) ?? 0).toFixed(2)} [${d.density_indicator ?? "GREEN"}]`,
+          severity: "info",
+        });
       }
       break;
     }
@@ -74,8 +90,9 @@ function handleMessage(message: WebSocketMessage) {
     case "recommendation_changed": {
       if (message.data) {
         const recData = (message.data.recommendation as Record<string, unknown>) || message.data;
-        store.setRecommendation(recData as never);
-        const top = (recData.recommendations as Array<Record<string, unknown>>)?.[0];
+        store.setRecommendation(recData as unknown as import("@/types").Recommendation);
+        const recs = recData.recommendations as Array<Record<string, unknown>> | undefined;
+        const top = recs?.[0];
         if (top) {
           store.addTimelineEvent({
             id: `rec-${Date.now()}`,
@@ -93,7 +110,7 @@ function handleMessage(message: WebSocketMessage) {
       if (message.data) {
         const warnings = store.warnings || [];
         const w = (message.data.warning as Record<string, unknown>) || message.data;
-        const newWarning = {
+        const newWarning: import("@/types").Warning = {
           id: (w.id as string) || `warn-${Date.now()}`,
           trainId: (w.trainId as string) || (w.train_id as string) || "",
           carId: (w.carId as number) ?? (w.car_id as number) ?? 0,
@@ -120,17 +137,13 @@ function handleMessage(message: WebSocketMessage) {
 
     case "camera_status_updated": {
       if (message.data) {
-        const currentCars = [...store.cars];
-        const idx = currentCars.findIndex(
-          (c) => c.carId === message.data!.camera_id
-        );
-        if (idx >= 0) {
-          currentCars[idx] = {
-            ...currentCars[idx],
-            cameraStatus: (message.data.status as string) ?? "unknown",
-          };
-          store.setCars(currentCars);
-        }
+        store.addTimelineEvent({
+          id: `cam-${Date.now()}`,
+          timestamp: ts,
+          type: "info",
+          message: `Camera ${(message.data.camera_id as string) ?? ""}: ${(message.data.status as string) ?? "unknown"}`,
+          severity: "info",
+        });
       }
       break;
     }
@@ -152,14 +165,13 @@ function handleMessage(message: WebSocketMessage) {
     case "system_health_updated": {
       if (message.data) {
         const health = (message.data.health as Record<string, unknown>) || message.data;
-        store.setSystemHealth(health as never);
-      }
-      break;
-    }
-
-    case "state_updated": {
-      if (message.data) {
-        store.setSystemState(message.data as never);
+        store.setSystemHealth([
+          { label: "Backend", status: health.backend === "running" ? "ok" : "error", value: String(health.backend ?? "unknown"), icon: "server" },
+          { label: "AI Pipeline", status: health.ai === "loaded" ? "ok" : "warning", value: String(health.ai ?? "offline"), icon: "cpu" },
+          { label: "Cameras", status: (health.cameras as number) > 0 ? "ok" : "warning", value: `${health.cameras ?? 0} active`, icon: "camera" },
+          { label: "Uptime", status: "ok", value: `${Math.floor((health.uptime as number ?? 0) / 60)}m`, icon: "clock" },
+          { label: "Warnings", status: (health.activeWarnings as number) > 0 ? "warning" : "ok", value: `${health.activeWarnings ?? 0} active`, icon: "alert" },
+        ]);
       }
       break;
     }

@@ -1,6 +1,6 @@
 """
 PROJECT THEMIS - Configuration Endpoint
-Version: 5.0
+Version: 6.0
 
 This endpoint provides system configuration.
 """
@@ -17,14 +17,15 @@ async def get_config():
     """
     cameras = []
     for i in range(1, 11):
-        for j in range(1, 3):
+        for j in range(1, 5):
             cam_id = f"car{str(i).zfill(2)}_cam{str(j).zfill(2)}"
             cameras.append({
                 "id": cam_id,
-                "type": "cabin",
+                "type": "ceiling_fisheye",
                 "zone": f"car_{i}",
                 "carMapping": i,
                 "status": "online",
+                "resolution": "640x640",
             })
 
     return {
@@ -36,16 +37,17 @@ async def get_config():
                 "capacityPerCar": 200,
             },
             "occupancy": {
-                "lowThreshold": 0.4,
-                "normalThreshold": 0.7,
-                "highThreshold": 0.9,
-                "fullThreshold": 1.0,
+                "greenThreshold": 0.4,
+                "yellowThreshold": 0.7,
+                "redThreshold": 0.9,
             },
             "cameras": cameras,
             "ai": {
-                "model": "YOLO11s",
+                "model": "Spatial Occupancy Segmentation",
                 "confidence": 0.5,
                 "imageSize": 640,
+                "camerasPerCar": 4,
+                "totalCameras": 40,
             },
         },
     }
@@ -56,7 +58,7 @@ async def get_lookup_table():
     """Get camera to car mapping lookup table."""
     mappings = []
     for i in range(1, 11):
-        for j in range(1, 3):
+        for j in range(1, 5):
             cam_id = f"car{str(i).zfill(2)}_cam{str(j).zfill(2)}"
             mappings.append({
                 "cameraId": cam_id,

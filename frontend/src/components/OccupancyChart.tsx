@@ -14,22 +14,20 @@ import {
 interface OccupancyChartProps {
   data: Array<{
     carId: number;
-    occupancy: number;
-    status: string;
+    occupancyRatio: number;
+    densityIndicator: string;
   }>;
 }
 
-const statusColors: Record<string, string> = {
-  LOW: "#16A34A",
-  NORMAL: "#22C55E",
-  HIGH: "#F59E0B",
-  FULL: "#F97316",
-  OVERCAPACITY: "#ED242B",
+const densityColors: Record<string, string> = {
+  GREEN: "#16A34A",
+  YELLOW: "#F59E0B",
+  RED: "#ED242B",
 };
 
 interface CustomTooltipProps {
   active?: boolean;
-  payload?: Array<{ payload: { name: string; occupancy: number; status: string } }>;
+  payload?: Array<{ payload: { name: string; occupancyRatio: number; densityIndicator: string } }>;
 }
 
 function CustomTooltip({ active, payload }: CustomTooltipProps) {
@@ -39,10 +37,10 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
     <div className="glass rounded-lg px-3 py-2 shadow-xl">
       <p className="text-sm font-medium text-foreground">{d.name}</p>
       <p className="text-xs text-muted-foreground">
-        Occupancy: <span className="text-primary font-medium">{d.occupancy.toFixed(1)}%</span>
+        Occupancy: <span className="text-primary font-medium">{(d.occupancyRatio * 100).toFixed(1)}%</span>
       </p>
       <p className="text-xs text-muted-foreground">
-        Status: <span className="text-foreground">{d.status}</span>
+        Density: <span className="text-foreground">{d.densityIndicator}</span>
       </p>
     </div>
   );
@@ -51,8 +49,8 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 export function OccupancyChart({ data }: OccupancyChartProps) {
   const chartData = data.map((d) => ({
     name: `Car ${d.carId}`,
-    occupancy: d.occupancy,
-    status: d.status,
+    occupancyRatio: d.occupancyRatio,
+    densityIndicator: d.densityIndicator,
   }));
 
   return (
@@ -78,16 +76,17 @@ export function OccupancyChart({ data }: OccupancyChartProps) {
             <YAxis
               stroke="#94A3B8"
               fontSize={11}
-              domain={[0, 100]}
+              domain={[0, 1]}
+              tickFormatter={(v) => `${(v * 100).toFixed(0)}%`}
               tickLine={false}
               axisLine={false}
             />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(45,42,112,0.04)" }} />
-            <Bar dataKey="occupancy" radius={[6, 6, 0, 0]} maxBarSize={48}>
+            <Bar dataKey="occupancyRatio" radius={[6, 6, 0, 0]} maxBarSize={48}>
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={statusColors[entry.status] || "url(#barGradient)"}
+                  fill={densityColors[entry.densityIndicator] || "url(#barGradient)"}
                   fillOpacity={0.85}
                 />
               ))}

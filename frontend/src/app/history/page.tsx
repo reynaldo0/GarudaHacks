@@ -3,21 +3,8 @@
 import { useEffect, useState } from "react";
 import { WifiOff, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
-
-interface HistoryRecord {
-  timestamp: string;
-  carId: number;
-  occupancy: number;
-  occupancyPercentage: number;
-  status: string;
-}
-
-interface HistorySummary {
-  averageOccupancy: number;
-  peakOccupancy: number;
-  peakTime: string;
-  totalRecords: number;
-}
+import { HistoryRecord, HistorySummary } from "@/types";
+import clsx from "clsx";
 
 export default function HistoryPage() {
   const [records, setRecords] = useState<HistoryRecord[]>([]);
@@ -87,7 +74,7 @@ export default function HistoryPage() {
       <div className="flex items-center justify-between animate-fade-in">
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">History</h1>
-          <p className="text-muted-foreground text-sm mt-1">Historical occupancy data</p>
+          <p className="text-muted-foreground text-sm mt-1">Historical spatial occupancy data</p>
         </div>
         <select
           value={hours}
@@ -122,7 +109,7 @@ export default function HistoryPage() {
                 <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Timestamp</th>
                 <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Car</th>
                 <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Occupancy</th>
-                <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                <th className="text-left p-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Density</th>
               </tr>
             </thead>
             <tbody>
@@ -134,8 +121,7 @@ export default function HistoryPage() {
                 </tr>
               ) : (
                 records.slice(-50).reverse().map((record, idx) => {
-                  const occVal = typeof record.occupancy === "number" ? record.occupancy : 0;
-                  const isHigh = occVal > 0.7 || occVal > 70;
+                  const occ = record.occupancyRatio;
                   return (
                     <tr
                       key={idx}
@@ -149,24 +135,25 @@ export default function HistoryPage() {
                         <div className="flex items-center gap-2">
                           <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
                             <div
-                              className={`h-full rounded-full ${isHigh ? "bg-secondary" : "bg-green-500"}`}
-                              style={{ width: `${Math.min(occVal > 1 ? occVal : occVal * 100, 100)}%` }}
+                              className={clsx(
+                                "h-full rounded-full",
+                                record.densityIndicator === "RED" ? "bg-red-500" :
+                                record.densityIndicator === "YELLOW" ? "bg-amber-500" : "bg-green-500"
+                              )}
+                              style={{ width: `${Math.min(occ * 100, 100)}%` }}
                             />
                           </div>
-                          <span className="text-foreground">
-                            {occVal > 1 ? `${occVal.toFixed(0)}%` : `${(occVal * 100).toFixed(0)}%`}
-                          </span>
+                          <span className="text-foreground">{(occ * 100).toFixed(0)}%</span>
                         </div>
                       </td>
                       <td className="p-4">
-                        <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${
-                          record.status === "HIGH" || record.status === "FULL"
-                            ? "bg-amber-50 text-amber-600"
-                            : record.status === "OVERCAPACITY"
-                            ? "bg-red-50 text-accent"
-                            : "bg-green-50 text-green-600"
-                        }`}>
-                          {record.status}
+                        <span className={clsx(
+                          "px-2.5 py-1 rounded-lg text-xs font-medium",
+                          record.densityIndicator === "RED" && "bg-red-50 text-red-600",
+                          record.densityIndicator === "YELLOW" && "bg-amber-50 text-amber-600",
+                          record.densityIndicator === "GREEN" && "bg-green-50 text-green-600",
+                        )}>
+                          {record.densityIndicator}
                         </span>
                       </td>
                     </tr>

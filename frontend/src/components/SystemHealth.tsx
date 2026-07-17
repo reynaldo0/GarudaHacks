@@ -24,9 +24,9 @@ export function SystemHealth({ systemState }: SystemHealthProps) {
       icon: <Server className="w-4 h-4" />,
     },
     {
-      label: "YOLO Engine",
+      label: "Spatial Engine",
       status: systemState ? "ok" : "warning",
-      value: systemState ? "YOLO11s Loaded" : "Offline",
+      value: systemState ? "Spatial Segmentation Active" : "Offline",
       icon: <Brain className="w-4 h-4" />,
     },
     {
@@ -50,13 +50,13 @@ export function SystemHealth({ systemState }: SystemHealthProps) {
     {
       label: "Cameras",
       status: (systemState?.system?.activeCameras || 0) > 0 ? "ok" : "warning",
-      value: `${systemState?.system?.activeCameras || 0} active`,
+      value: `${systemState?.system?.activeCameras || 0} / 40 active`,
       icon: <Camera className="w-4 h-4" />,
     },
     {
       label: "AI Pipeline",
       status: systemState ? "ok" : "error",
-      value: systemState ? "8 Engines Active" : "Offline",
+      value: systemState ? "9 Engines Active" : "Offline",
       icon: <Cpu className="w-4 h-4" />,
     },
     {

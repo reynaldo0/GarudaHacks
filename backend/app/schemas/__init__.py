@@ -1,5 +1,5 @@
 from app.schemas.occupancy import (
-    CarOccupancy,
+    CarSpatialOccupancy,
     TrainState,
     Warning,
     Decision,
@@ -12,7 +12,7 @@ from app.schemas.occupancy import (
 )
 
 __all__ = [
-    "CarOccupancy",
+    "CarSpatialOccupancy",
     "TrainState",
     "Warning",
     "Decision",

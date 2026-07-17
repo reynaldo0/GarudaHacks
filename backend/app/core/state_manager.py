@@ -89,7 +89,7 @@ class StateManager:
                 camera_id=camera_id,
                 timestamp=datetime.utcnow(),
             )
-            car.risk_score = round(risk_score, 4) if hasattr(car, 'risk_score') else round(risk_score, 4)
+            car.risk_score = round(risk_score, 4)
 
             # Update or append car
             existing_idx = next(

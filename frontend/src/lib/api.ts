@@ -1,5 +1,5 @@
 import axios from "axios";
-import { SystemState } from "@/types";
+import { SystemState, OccupancyData, Recommendation } from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -34,8 +34,8 @@ api.interceptors.response.use((res) => {
 
 export const apiClient = {
   async getHealth() {
-    const res = await api.get("/health");
-    return res.data;
+    const res = await api.get("/api/v1/health");
+    return res.data.data;
   },
 
   async getState(): Promise<SystemState> {
@@ -43,7 +43,7 @@ export const apiClient = {
     return res.data.data;
   },
 
-  async getOccupancy() {
+  async getOccupancy(): Promise<OccupancyData> {
     const res = await api.get("/api/v1/occupancy");
     return res.data.data;
   },
@@ -55,12 +55,12 @@ export const apiClient = {
 
   async resetSimulation() {
     const res = await api.post("/api/v1/simulation/reset");
-    return res.data;
+    return res.data.data;
   },
 
   async loadScenario(scenarioName: string) {
     const res = await api.post(`/api/v1/simulation/scenario/${scenarioName}`);
-    return res.data;
+    return res.data.data;
   },
 
   async getSimulationStatus() {
@@ -68,7 +68,7 @@ export const apiClient = {
     return res.data.data;
   },
 
-  async getRecommendation() {
+  async getRecommendation(): Promise<Recommendation | null> {
     const res = await api.get("/api/v1/recommendation");
     return res.data.data;
   },

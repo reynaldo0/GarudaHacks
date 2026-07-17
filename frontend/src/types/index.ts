@@ -1,27 +1,58 @@
-export interface CarOccupancy {
+export interface CarSpatialOccupancy {
   carId: number;
-  occupancyPct: number;
-  status: string;
-  passengers: number;
-  capacity: number;
+  occupancyRatio: number;
+  freeSpaceRatio: number;
+  densityIndicator: "GREEN" | "YELLOW" | "RED";
+  spatialOccupancyScore: number;
+  cameraStatus?: string;
+  cameraId?: string;
+  riskScore?: number;
   prediction?: {
     trend: string;
-    predictedOccupancy: number;
+    predictedOccupancyRatio: number;
     confidence: number;
-  } | null;
-  cameraStatus?: string;
-  recommendation?: {
-    action: string;
-    confidence: number;
+    horizonMinutes: number;
   } | null;
 }
 
-export interface TrainState {
+export interface OccupancyData {
   trainId: string;
+  station: string;
+  timestamp: string;
+  cars: CarSpatialOccupancy[];
+}
+
+export interface TrainInfo {
+  id: string;
   formation: string;
   totalCars: number;
-  cars: CarOccupancy[];
+  avgOccupancyRatio: number;
+  greenCars: number;
+  yellowCars: number;
+  redCars: number;
+}
+
+export interface SystemState {
   timestamp: string;
+  station: {
+    id: string;
+    name: string;
+  };
+  train: TrainInfo;
+  occupancy: {
+    avgOccupancyRatio: number;
+    greenCars: number;
+    yellowCars: number;
+    redCars: number;
+  };
+  warning: Warning | null;
+  system: {
+    trains: number;
+    activeWarnings: number;
+    totalDecisions: number;
+    activeCameras: number;
+    uptimeSeconds: number;
+  };
 }
 
 export interface Warning {
@@ -32,7 +63,7 @@ export interface Warning {
   severity: string;
   message: string;
   timestamp: string;
-  isActive: boolean;
+  isActive?: boolean;
 }
 
 export interface RecommendationItem {
@@ -44,7 +75,6 @@ export interface RecommendationItem {
   priority: number;
   label: string;
   isWomenPriority: boolean;
-  passengersToMove: number;
   score: number;
 }
 
@@ -56,30 +86,6 @@ export interface Recommendation {
   recommendedCars: number[];
   recommendations: RecommendationItem[];
   timestamp: string;
-}
-
-export interface SystemState {
-  timestamp: string;
-  station: {
-    id: string;
-    name: string;
-  };
-  train: {
-    id: string;
-    formation: string;
-    totalPassengers: number;
-    totalCapacity: number;
-    percentage: number;
-    status: string;
-  };
-  warning: Warning | null;
-  system: {
-    trains: number;
-    activeWarnings: number;
-    totalDecisions: number;
-    activeCameras: number;
-    uptimeSeconds: number;
-  };
 }
 
 export interface TimelineEvent {
@@ -97,20 +103,16 @@ export interface SystemHealthItem {
   icon: string;
 }
 
-export interface OccupancyCarResponse {
+export interface HistoryRecord {
+  timestamp: string;
   carId: number;
-  occupancyPct: number;
-  status: string;
-  passengers: number;
-  capacity: number;
-  prediction?: {
-    trend: string;
-    predictedOccupancy: number;
-    confidence: number;
-    horizonMinutes?: number;
-  } | null;
-  cameraStatus?: string;
-  cameraId?: string;
-  riskScore?: number;
-  recommendation?: Record<string, unknown> | null;
+  occupancyRatio: number;
+  densityIndicator: string;
+}
+
+export interface HistorySummary {
+  averageOccupancy: number;
+  peakOccupancy: number;
+  peakTime: string;
+  totalRecords: number;
 }

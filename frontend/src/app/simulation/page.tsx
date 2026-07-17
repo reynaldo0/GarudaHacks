@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { apiClient } from "@/lib/api";
-import { RotateCcw, CheckCircle, Zap, Cloud, Sun, Moon, TrainFront } from "lucide-react";
+import { RotateCcw, CheckCircle, Zap, Cloud, Sun, Moon, TrainFront, AlertTriangle } from "lucide-react";
 import clsx from "clsx";
 
 const scenarios = [
-  { id: "empty", name: "Empty", description: "Empty train", icon: Cloud, gradient: "from-slate-100 to-slate-200" },
-  { id: "normal", name: "Normal", description: "Normal operation", icon: Sun, gradient: "from-green-100 to-emerald-100" },
+  { id: "empty", name: "Empty", description: "Empty train - no passengers", icon: Cloud, gradient: "from-slate-100 to-slate-200" },
+  { id: "normal", name: "Normal", description: "Normal operation - balanced mid-day traffic", icon: Sun, gradient: "from-green-100 to-emerald-100" },
   { id: "peak_hour", name: "Peak Hour", description: "Rush hour congestion", icon: Zap, gradient: "from-amber-100 to-orange-100" },
   { id: "holiday", name: "Holiday", description: "Holiday light traffic", icon: Moon, gradient: "from-blue-100 to-indigo-100" },
+  { id: "imbalanced", name: "Imbalanced", description: "Heavy imbalance - test redistribution", icon: AlertTriangle, gradient: "from-orange-100 to-red-100" },
+  { id: "emergency", name: "Emergency", description: "Multiple RED density cars", icon: AlertTriangle, gradient: "from-red-100 to-rose-100" },
 ];
 
 export default function SimulationPage() {
@@ -54,7 +56,7 @@ export default function SimulationPage() {
     <div className="space-y-6">
       <div className="animate-fade-in">
         <h1 className="text-2xl font-bold text-foreground tracking-tight">Simulation</h1>
-        <p className="text-muted-foreground text-sm mt-1">Load predefined scenarios for testing</p>
+        <p className="text-muted-foreground text-sm mt-1">Load predefined spatial occupancy scenarios</p>
       </div>
 
       {message && (
@@ -71,7 +73,7 @@ export default function SimulationPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {scenarios.map((scenario, i) => {
           const Icon = scenario.icon;
           const isActive = activeScenario === scenario.id;
@@ -123,11 +125,11 @@ export default function SimulationPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           {[
-            "Select a scenario to load predefined occupancy data",
-            "Backend populates the State Manager with scenario data",
-            "Unity Digital Twin visualizes the train state",
-            "Dashboard shows real-time occupancy charts",
-            "AI generates recommendations based on occupancy",
+            "Select a scenario to load predefined spatial occupancy data",
+            "Backend populates State Manager with occupancy ratios per car",
+            "Unity Digital Twin visualizes density indicators (GREEN/YELLOW/RED)",
+            "Dashboard shows real-time occupancy charts and predictions",
+            "AI generates redistribution recommendations for imbalanced trains",
           ].map((step, i) => (
             <div key={i} className="flex items-start gap-2 p-3 rounded-xl bg-muted border border-border">
               <span className="text-xs font-bold text-primary mt-0.5">{i + 1}</span>

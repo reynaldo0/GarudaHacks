@@ -17,6 +17,7 @@ class CarSpatialOccupancy(BaseModel):
     free_space_ratio: float = 1.0        # 0.0 - 1.0
     density_indicator: str = "GREEN"     # GREEN, YELLOW, RED
     spatial_occupancy_score: float = 0.0 # 0.0 - 1.0
+    risk_score: float = 0.0              # 0.0 - 1.0
     floor_area_m2: float = 42.0
     camera_id: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.utcnow)

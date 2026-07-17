@@ -31,9 +31,9 @@ async def get_state():
         avg_occupancy = total_occupancy / len(train.cars) if train.cars else 0
 
         # Count density indicators
-        green_count = sum(1 for c in train.cars if getattr(c, 'density_indicator', 'GREEN') == 'GREEN')
-        yellow_count = sum(1 for c in train.cars if getattr(c, 'density_indicator', 'GREEN') == 'YELLOW')
-        red_count = sum(1 for c in train.cars if getattr(c, 'density_indicator', 'GREEN') == 'RED')
+        green_count = sum(1 for c in train.cars if getattr(c, 'density_indicator', None) == 'GREEN')
+        yellow_count = sum(1 for c in train.cars if getattr(c, 'density_indicator', None) == 'YELLOW')
+        red_count = sum(1 for c in train.cars if getattr(c, 'density_indicator', None) == 'RED')
 
         train_data = {
             "id": train.train_id,

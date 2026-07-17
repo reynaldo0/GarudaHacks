@@ -8,6 +8,16 @@ interface RecommendationPanelProps {
   recommendation: Recommendation | null;
 }
 
+function FemaleIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="12" cy="8" r="5" />
+      <line x1="12" y1="13" x2="12" y2="21" />
+      <line x1="8" y1="18" x2="16" y2="18" />
+    </svg>
+  );
+}
+
 export function RecommendationPanel({ recommendation }: RecommendationPanelProps) {
   return (
     <div className="glass rounded-2xl p-6 animate-fade-in">
@@ -71,11 +81,9 @@ export function RecommendationPanel({ recommendation }: RecommendationPanelProps
                     <p className="text-2xl font-bold text-accent">Gerbong {rec.fromCarId}</p>
                   </div>
                   <div className="flex flex-col items-center gap-1">
-                    {rec.passengersToMove && (
-                      <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                        <Users className="w-3 h-3" /> ~{rec.passengersToMove}
-                      </span>
-                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {(rec.confidence * 100).toFixed(0)}%
+                    </span>
                   </div>
                   <div className="flex-1 text-center">
                     <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">To</p>
@@ -89,8 +97,6 @@ export function RecommendationPanel({ recommendation }: RecommendationPanelProps
                   </div>
                 </div>
 
-
-
                 <div className="p-3 rounded-lg bg-background/50 border border-border">
                   <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">Alasan</p>
                   <p className="text-sm text-foreground">{rec.reason}</p>
@@ -101,23 +107,5 @@ export function RecommendationPanel({ recommendation }: RecommendationPanelProps
         </div>
       )}
     </div>
-  );
-}
-
-function FemaleIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <circle cx="12" cy="8" r="5" />
-      <line x1="12" y1="13" x2="12" y2="21" />
-      <line x1="8" y1="18" x2="16" y2="18" />
-    </svg>
   );
 }
