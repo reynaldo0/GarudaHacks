@@ -1,49 +1,94 @@
-# PROJECT THEMIS V6
+# PROJECT THEMIS 🚆
 
-**AI-powered Railway Decision Intelligence Platform**
+> **AI-Powered Railway Occupancy Intelligence & Decision Support Platform**
 
-Real-time spatial occupancy estimation and operational decision support for KRL Commuter Line trains (SF10 formation, 10 cars, 40 ceiling fisheye cameras).
+PROJECT THEMIS is an intelligent railway operation platform that leverages Artificial Intelligence, Computer Vision, and Digital Twin technology to provide real-time passenger occupancy monitoring, operational analytics, and AI-driven decision support for railway operators.
 
 ---
 
-## Architecture
+# 🚨 The Problem
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     Unity Digital Twin                          │
-│  4 ceiling fisheye cameras per car (40 total)                  │
-│  Captures JPEG/PNG every 5s → POST /api/v1/frame              │
-└──────────────────────┬──────────────────────────────────────────┘
-                       │ HTTP + X-API-Key
-                       ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  Backend (FastAPI + Python)                      │
-│  Port 8005                                                      │
-│                                                                 │
-│  ┌─────────────┐  ┌────────────┐  ┌─────────────────────────┐  │
-│  │ VideoAdapter│→ │ 9 AI       │→ │ StateManager            │  │
-│  │ (undistort) │  │ Engines    │  │ (in-memory singleton)   │  │
-│  └─────────────┘  └────────────┘  └──────────┬──────────────┘  │
-│                                               │                  │
-│  ┌──────────────┐  ┌────────────────┐         │                  │
-│  │ Persistence  │← │ PipelineResult │←────────┘                  │
-│  │ Service      │  └────────────────┘                           │
-│  │ (MySQL)      │                                               │
-│  └──────┬───────┘  ┌────────────────┐                           │
-│         │          │ IntegrationHub │→ WebSocket /ws            │
-│         ▼          └────────────────┘                           │
-│  ┌─────────────┐                                                 │
-│  │ MySQL (Docker)│                                               │
-│  │ Port 3306    │                                               │
-│  └─────────────┘                                                 │
-└─────────────────────────────────────────────────────────────────┘
-                       │ WebSocket push
-                       ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  Frontend (Next.js 16)                           │
-│  Port 3000                                                      │
-│  Dashboard · Train Status · Upload · History · Simulation       │
-└─────────────────────────────────────────────────────────────────┘
+Urban railway systems transport millions of passengers every day. However, operators still face significant challenges in monitoring passenger distribution inside train carriages in real time.
+
+Without accurate occupancy information, operators often struggle to:
+
+- Detect overcrowded carriages before they become critical.
+- Monitor passenger distribution across multiple train cars simultaneously.
+- Make fast, data-driven operational decisions.
+- Analyze historical occupancy trends for service optimization.
+- Improve passenger comfort and operational efficiency.
+
+As a result, overcrowding frequently occurs while nearby carriages remain underutilized, reducing both passenger experience and operational effectiveness.
+
+---
+
+# 💡 Our Solution
+
+PROJECT THEMIS addresses these challenges through an AI-powered decision support platform that combines Computer Vision, Machine Learning, and Digital Twin technology.
+
+Using cameras installed inside train carriages, our AI continuously analyzes passenger occupancy and transforms raw visual data into actionable operational intelligence.
+
+The platform provides railway operators with:
+
+- 🚆 Real-time passenger occupancy monitoring
+- 🧠 AI-generated operational recommendations
+- 📊 Historical analytics and occupancy trends
+- 🌐 Interactive Digital Twin visualization
+- ⚡ Real-time dashboard for railway operations
+- 📡 Live communication through WebSocket
+- 📈 Decision support for smarter railway management
+
+Instead of reacting after overcrowding occurs, PROJECT THEMIS enables operators to proactively monitor conditions and make faster, smarter, and data-driven decisions.
+
+---
+
+# 🎯 Vision
+
+Our vision is to transform railway operations through intelligent decision support, making public transportation safer, more efficient, and more sustainable.
+
+PROJECT THEMIS evolves from an occupancy monitoring system into a scalable AI platform capable of supporting future intelligent transportation ecosystems.
+
+---
+
+# ✨ Key Features
+
+- 🤖 AI-based Passenger Occupancy Detection
+- 🚆 Real-time Occupancy Monitoring
+- 📊 Interactive Analytics Dashboard
+- 🌍 Digital Twin Train Visualization (Unity)
+- 📡 WebSocket Live Updates
+- 📈 Historical Occupancy Analytics
+- 🧠 AI Recommendation Engine
+- 📷 Multi-camera Image Processing Pipeline
+- 🔐 Secure REST API
+- 🐳 Docker-based Deployment
+- ☁️ Production-ready Architecture
+
+---
+
+# 🏗️ System Architecture
+
+```text
+Train Cameras
+      │
+      ▼
+ Computer Vision & AI
+      │
+      ▼
+ FastAPI Backend
+      │
+ ┌────┴─────────┐
+ ▼              ▼
+MySQL      WebSocket
+      │
+      ▼
+ Next.js Dashboard
+      │
+      ▼
+ Unity Digital Twin
+      │
+      ▼
+ Railway Operators
 ```
 
 ---
