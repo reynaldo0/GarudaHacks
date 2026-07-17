@@ -12,7 +12,7 @@ from app.api.router import api_router
 from app.websocket.router import ws_router
 from app.core.exceptions import setup_exception_handlers
 from app.core.state_manager import state_manager
-from app.database.connection import init_db
+from app.database.connection import engine
 from app.ai.spatial_engine import SpatialEngine
 from app.ai.occupancy_engine import OccupancyEngine
 from app.ai.lookup_table import LookupTable
@@ -54,14 +54,25 @@ async def lifespan(app: FastAPI):
     Path("weights").mkdir(exist_ok=True)
     Path(settings.FISHEYE_CALIBRATION_DIR).mkdir(parents=True, exist_ok=True)
 
-    # Initialize database
-    print("[INFO] Initializing PostgreSQL database...")
+    # Run database migrations (Alembic)
+    print("[INFO] Running database migrations...")
     try:
-        init_db()
-        print("[OK] Database initialized")
+        from alembic.config import Config
+        from alembic import command
+        alembic_cfg = Config("alembic.ini")
+        alembic_cfg.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+        command.upgrade(alembic_cfg, "head")
+        print("[OK] Database migrations applied")
     except Exception as e:
-        print(f"[WARN] Database init failed: {e}")
-        print("[INFO] Continuing without database...")
+        print(f"[WARN] Migration failed: {e}")
+        print("[INFO] Falling back to create_all...")
+        try:
+            from app.database.connection import Base
+            Base.metadata.create_all(bind=engine)
+            print("[OK] Tables created via create_all")
+        except Exception as e2:
+            print(f"[WARN] Database init failed: {e2}")
+            print("[INFO] Continuing without database...")
 
     # Initialize AI engines
     global spatial_engine, occupancy_engine, lookup_table, fusion_engine
