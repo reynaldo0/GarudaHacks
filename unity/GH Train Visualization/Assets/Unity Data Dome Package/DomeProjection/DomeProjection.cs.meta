@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 83194f3a99f52423ba844fc475bc9d9c
+timeCreated: 1459760473
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 62664
+  packageName: Data Dome Toolkit
+  packageVersion: 1.1
+  assetPath: Assets/Unity Data Dome Package/DomeProjection/DomeProjection.cs
+  uploadId: 142350

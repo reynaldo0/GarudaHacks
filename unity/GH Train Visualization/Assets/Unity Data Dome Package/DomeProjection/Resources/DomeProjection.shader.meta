@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 386f960af87f44e56a543f3a0d79d0cc
+timeCreated: 1459760952
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 62664
+  packageName: Data Dome Toolkit
+  packageVersion: 1.1
+  assetPath: Assets/Unity Data Dome Package/DomeProjection/Resources/DomeProjection.shader
+  uploadId: 142350
