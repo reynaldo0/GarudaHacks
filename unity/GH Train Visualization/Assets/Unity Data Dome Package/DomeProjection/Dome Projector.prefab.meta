@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8c8a8f77e8699403ab6c0d4b8fe24c16
+timeCreated: 1462352691
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 62664
+  packageName: Data Dome Toolkit
+  packageVersion: 1.1
+  assetPath: Assets/Unity Data Dome Package/DomeProjection/Dome Projector.prefab
+  uploadId: 142350

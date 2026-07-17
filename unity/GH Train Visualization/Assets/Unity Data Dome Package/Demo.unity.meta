@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 334ea79eec24448c4bee38936832a966
+timeCreated: 1461917200
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 62664
+  packageName: Data Dome Toolkit
+  packageVersion: 1.1
+  assetPath: Assets/Unity Data Dome Package/Demo.unity
+  uploadId: 142350
