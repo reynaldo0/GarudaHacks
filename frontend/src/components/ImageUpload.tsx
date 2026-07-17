@@ -11,7 +11,7 @@ interface ImageSlot {
   preview: string | null;
 }
 
-const POSITION_LABELS = ["Front-Left", "Front-Right", "Rear-Left", "Rear-Right"];
+const POSITION_LABELS = ["Front", "Front-Middle", "Back-Middle", "Back"];
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export function ImageUpload({ onResult }: { onResult: (result: PipelineResult) => void }) {
