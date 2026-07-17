@@ -10,6 +10,7 @@ import {
   Activity,
   Wifi,
   WifiOff,
+  Camera,
 } from "lucide-react";
 import clsx from "clsx";
 import { useAppStore } from "@/store/useAppStore";
@@ -17,6 +18,7 @@ import { useAppStore } from "@/store/useAppStore";
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/train", label: "Train Status", icon: Train },
+  { href: "/upload", label: "Frame Upload", icon: Camera },
   { href: "/history", label: "History", icon: History },
   { href: "/simulation", label: "Simulation", icon: PlayCircle },
 ];

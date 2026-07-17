@@ -1,0 +1,206 @@
+"use client";
+
+import { useState, useRef, useCallback } from "react";
+import { Upload, X, Camera, Loader2, ImageIcon } from "lucide-react";
+import clsx from "clsx";
+import { apiClient } from "@/lib/api";
+import { PipelineResult } from "@/types";
+
+interface ImageSlot {
+  file: File | null;
+  preview: string | null;
+}
+
+const CAMERA_LABELS = ["Camera 1 (Front-Left)", "Camera 2 (Front-Right)", "Camera 3 (Rear-Left)", "Camera 4 (Rear-Right)"];
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+export function ImageUpload({ onResult }: { onResult: (result: PipelineResult) => void }) {
+  const [slots, setSlots] = useState<ImageSlot[]>([
+    { file: null, preview: null },
+    { file: null, preview: null },
+    { file: null, preview: null },
+    { file: null, preview: null },
+  ]);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [trainId, setTrainId] = useState("SF10-001");
+  const [stationId, setStationId] = useState("unknown");
+  const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleFileSelect = useCallback((index: number, file: File) => {
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      setError("Only JPEG, PNG, and WebP images are accepted.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError("File size must be under 10 MB.");
+      return;
+    }
+    setError(null);
+    const preview = URL.createObjectURL(file);
+    setSlots((prev) => {
+      const next = [...prev];
+      if (next[index].preview) URL.revokeObjectURL(next[index].preview!);
+      next[index] = { file, preview };
+      return next;
+    });
+  }, []);
+
+  const removeSlot = useCallback((index: number) => {
+    setSlots((prev) => {
+      const next = [...prev];
+      if (next[index].preview) URL.revokeObjectURL(next[index].preview!);
+      next[index] = { file: null, preview: null };
+      return next;
+    });
+  }, []);
+
+  const handleDrop = useCallback((index: number, e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFileSelect(index, file);
+  }, [handleFileSelect]);
+
+  const handleUpload = async () => {
+    const files = slots.filter((s) => s.file).map((s) => s.file!);
+    if (files.length === 0) {
+      setError("Please select at least one image.");
+      return;
+    }
+    setError(null);
+    setUploading(true);
+    try {
+      const cameraIds = slots.map((_, i) => `car01_cam${String(i + 1).padStart(2, "0")}`);
+      const result = await apiClient.uploadFrames(files, {
+        cameraIds: cameraIds.slice(0, files.length),
+        stationId,
+        trainId,
+      });
+      onResult(result);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Upload failed. Backend may be offline.";
+      setError(msg);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const filledCount = slots.filter((s) => s.file).length;
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        {slots.map((slot, i) => (
+          <div
+            key={i}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => handleDrop(i, e)}
+            className={clsx(
+              "relative group rounded-2xl border-2 border-dashed transition-all duration-200 overflow-hidden",
+              slot.preview
+                ? "border-primary/30 bg-primary/5"
+                : "border-border hover:border-primary/40 hover:bg-muted/50",
+              "aspect-square flex flex-col items-center justify-center cursor-pointer"
+            )}
+            onClick={() => !slot.preview && fileRefs.current[i]?.click()}
+          >
+            <input
+              ref={(el) => { fileRefs.current[i] = el; }}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleFileSelect(i, f);
+                e.target.value = "";
+              }}
+            />
+
+            {slot.preview ? (
+              <>
+                <img
+                  src={slot.preview}
+                  alt={`Camera ${i + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  onClick={(e) => { e.stopPropagation(); removeSlot(i); }}
+                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2">
+                  <p className="text-xs text-white font-medium truncate">{slot.file!.name}</p>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center gap-2 p-4">
+                <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                  <Camera className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <p className="text-xs text-muted-foreground text-center font-medium">{CAMERA_LABELS[i]}</p>
+                <p className="text-[10px] text-muted-foreground/70">Click or drag image</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex-1">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Train ID</label>
+          <input
+            type="text"
+            value={trainId}
+            onChange={(e) => setTrainId(e.target.value)}
+            className="w-full px-3 py-2 rounded-xl glass border border-border text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+          />
+        </div>
+        <div className="flex-1">
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Station ID</label>
+          <input
+            type="text"
+            value={stationId}
+            onChange={(e) => setStationId(e.target.value)}
+            className="w-full px-3 py-2 rounded-xl glass border border-border text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+          />
+        </div>
+      </div>
+
+      {error && (
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-accent text-sm">
+          <X className="w-4 h-4 flex-shrink-0" />
+          {error}
+        </div>
+      )}
+
+      <button
+        onClick={handleUpload}
+        disabled={uploading || filledCount === 0}
+        className={clsx(
+          "flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl font-medium text-sm transition-all duration-200",
+          uploading || filledCount === 0
+            ? "bg-muted text-muted-foreground cursor-not-allowed"
+            : "bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg hover:shadow-primary/25 hover:scale-[1.01]"
+        )}
+      >
+        {uploading ? (
+          <>
+            <Loader2 className="w-5 h-5 animate-spin" />
+            Analyzing...
+          </>
+        ) : (
+          <>
+            <Upload className="w-5 h-5" />
+            Upload & Analyze {filledCount > 0 ? `(${filledCount} image${filledCount > 1 ? "s" : ""})` : ""}
+          </>
+        )}
+      </button>
+
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <ImageIcon className="w-3.5 h-3.5" />
+        <span>Supported: JPEG, PNG, WebP &middot; Max 10 MB per file &middot; Upload 4 fisheye camera images for full analysis</span>
+      </div>
+    </div>
+  );
+}

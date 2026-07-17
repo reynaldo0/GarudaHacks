@@ -1,8 +1,16 @@
 import axios from "axios";
-import { SystemState, OccupancyData, Recommendation } from "@/types";
+import {
+  SystemState,
+  OccupancyData,
+  Recommendation,
+  PipelineResult,
+} from "@/types";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "https://api.themis.my.id:8001";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+const FRAME_API_KEY =
+  process.env.NEXT_PUBLIC_FRAME_API_KEY || "themis-unity-key-2026";
 
 function toCamelCase(str: string): string {
   return str.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
@@ -82,5 +90,28 @@ export const apiClient = {
     if (carId) params.append("car_id", String(carId));
     const res = await api.get(`/api/v1/history?${params}`);
     return res.data.data;
+  },
+
+  async uploadFrames(
+    files: File[],
+    options?: { cameraIds?: string[]; stationId?: string; trainId?: string },
+  ): Promise<PipelineResult> {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
+    if (options?.cameraIds?.length) {
+      formData.append("camera_ids", options.cameraIds.join(","));
+    }
+    if (options?.stationId) formData.append("station_id", options.stationId);
+    if (options?.trainId) formData.append("train_id", options.trainId);
+
+    const res = await axios.post(`${API_BASE}/api/v1/frame`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "X-API-Key": FRAME_API_KEY,
+      },
+      timeout: 30000,
+    });
+    const data = camelizeKeys(res.data?.data ?? res.data) as PipelineResult;
+    return data;
   },
 };

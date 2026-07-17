@@ -116,3 +116,20 @@ export interface HistorySummary {
   peakTime: string;
   totalRecords: number;
 }
+
+export interface PipelineResult {
+  carId: string;
+  occupancyRatio: number;
+  freeSpaceRatio: number;
+  densityIndicator: "GREEN" | "YELLOW" | "RED";
+  spatialOccupancyScore: number;
+  recommendedTarget: number | null;
+  doorAction: string;
+  announcement: string | null;
+  calesScore: number;
+  healthIndex: number;
+  damageMultiplier: number;
+  inspectionPriority: number;
+  recommendedAction: string;
+  timestamp: string;
+}
