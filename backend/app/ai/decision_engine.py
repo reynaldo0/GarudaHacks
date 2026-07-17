@@ -16,7 +16,7 @@ class DecisionEngine:
     def __init__(self):
         pass
 
-    def evaluate(self, car_data: Dict, train_id: str = "SF10-001") -> Optional[Warning]:
+    def evaluate(self, car_data: Dict, train_id: str = "SF6-001") -> Optional[Warning]:
         """
         Evaluate car data and generate warning if needed.
         """

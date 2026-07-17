@@ -38,7 +38,7 @@ async def receive_frame(
     files: List[UploadFile] = File(...),
     camera_ids: Optional[str] = Form(default=None),
     station_id: str = Form(default="unknown"),
-    train_id: str = Form(default="SF10-001"),
+    train_id: str = Form(default="SF6-001"),
     _auth=Depends(verify_api_key_header),
 ):
     """

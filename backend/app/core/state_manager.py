@@ -70,7 +70,7 @@ class StateManager:
         """Update spatial occupancy for a specific car."""
         with self._data_lock:
             if train_id not in self._trains:
-                total_cars = 10 if "SF10" in train_id else 8
+                total_cars = 6 if "SF6" in train_id else 8
                 self._trains[train_id] = TrainState(
                     train_id=train_id,
                     total_cars=total_cars,

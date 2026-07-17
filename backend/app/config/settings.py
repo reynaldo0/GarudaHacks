@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     DENSITY_RED_THRESHOLD: float = 0.0     # free_space < 30% = RED
 
     # --- Train Configuration ---
-    DEFAULT_TRAIN_FORMATION: str = "SF10"
+    DEFAULT_TRAIN_FORMATION: str = "SF6"
     DEFAULT_CAPACITY: int = 200
     FLOOR_AREA_M2: float = 42.0  # Average floor area per car (m^2)
 

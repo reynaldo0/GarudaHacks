@@ -65,9 +65,9 @@ async def get_state():
             "timestamp": datetime.utcnow().isoformat(),
             "station": {"id": "manggarai", "name": "Manggarai Station"},
             "train": train_data or {
-                "id": "SF10",
-                "formation": "SF10",
-                "totalCars": 10,
+                "id": "SF6",
+                "formation": "SF6",
+                "totalCars": 6,
             },
             "occupancy": train_data or {
                 "avgOccupancyRatio": 0,

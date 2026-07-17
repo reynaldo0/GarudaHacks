@@ -10,7 +10,7 @@ from typing import Dict, Optional
 from loguru import logger
 
 
-# Default camera to car mapping for SF10 formation (40 cameras, 4 per car)
+# Default camera to car mapping for SF6 formation (24 cameras, 4 per car)
 # Each camera is a ceiling fisheye covering one quadrant of the carriage
 DEFAULT_LOOKUP_TABLE = {
     # Car 1
@@ -43,26 +43,6 @@ DEFAULT_LOOKUP_TABLE = {
     "car06_cam02": {"zone": "car_6_front_right", "car_id": 6, "type": "ceiling_fisheye", "position": "front_right"},
     "car06_cam03": {"zone": "car_6_rear_left", "car_id": 6, "type": "ceiling_fisheye", "position": "rear_left"},
     "car06_cam04": {"zone": "car_6_rear_right", "car_id": 6, "type": "ceiling_fisheye", "position": "rear_right"},
-    # Car 7
-    "car07_cam01": {"zone": "car_7_front_left", "car_id": 7, "type": "ceiling_fisheye", "position": "front_left"},
-    "car07_cam02": {"zone": "car_7_front_right", "car_id": 7, "type": "ceiling_fisheye", "position": "front_right"},
-    "car07_cam03": {"zone": "car_7_rear_left", "car_id": 7, "type": "ceiling_fisheye", "position": "rear_left"},
-    "car07_cam04": {"zone": "car_7_rear_right", "car_id": 7, "type": "ceiling_fisheye", "position": "rear_right"},
-    # Car 8
-    "car08_cam01": {"zone": "car_8_front_left", "car_id": 8, "type": "ceiling_fisheye", "position": "front_left"},
-    "car08_cam02": {"zone": "car_8_front_right", "car_id": 8, "type": "ceiling_fisheye", "position": "front_right"},
-    "car08_cam03": {"zone": "car_8_rear_left", "car_id": 8, "type": "ceiling_fisheye", "position": "rear_left"},
-    "car08_cam04": {"zone": "car_8_rear_right", "car_id": 8, "type": "ceiling_fisheye", "position": "rear_right"},
-    # Car 9
-    "car09_cam01": {"zone": "car_9_front_left", "car_id": 9, "type": "ceiling_fisheye", "position": "front_left"},
-    "car09_cam02": {"zone": "car_9_front_right", "car_id": 9, "type": "ceiling_fisheye", "position": "front_right"},
-    "car09_cam03": {"zone": "car_9_rear_left", "car_id": 9, "type": "ceiling_fisheye", "position": "rear_left"},
-    "car09_cam04": {"zone": "car_9_rear_right", "car_id": 9, "type": "ceiling_fisheye", "position": "rear_right"},
-    # Car 10
-    "car10_cam01": {"zone": "car_10_front_left", "car_id": 10, "type": "ceiling_fisheye", "position": "front_left"},
-    "car10_cam02": {"zone": "car_10_front_right", "car_id": 10, "type": "ceiling_fisheye", "position": "front_right"},
-    "car10_cam03": {"zone": "car_10_rear_left", "car_id": 10, "type": "ceiling_fisheye", "position": "rear_left"},
-    "car10_cam04": {"zone": "car_10_rear_right", "car_id": 10, "type": "ceiling_fisheye", "position": "rear_right"},
 }
 
 

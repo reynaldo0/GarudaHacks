@@ -58,7 +58,7 @@ async def get_occupancy():
         return {
             "success": True,
             "data": {
-                "trainId": "SF10",
+                "trainId": "SF6",
                 "station": "Manggarai",
                 "timestamp": datetime.utcnow().isoformat(),
                 "cars": [],

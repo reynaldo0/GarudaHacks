@@ -40,7 +40,7 @@ export function PipelineResultPanel({ result }: Props) {
         <div className={clsx("w-4 h-4 rounded-full", densityColor[result.densityIndicator])} />
         <div>
           <p className="text-sm font-semibold text-foreground">
-            {result.carId} &mdash; Density: {result.densityIndicator}
+            Gerbong {result.carId.replace("car_", "")} &mdash; Density: {result.densityIndicator}
           </p>
           <p className="text-xs text-muted-foreground">
             Analyzed at {new Date(result.timestamp).toLocaleString()}

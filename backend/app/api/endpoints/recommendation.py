@@ -12,7 +12,7 @@ from app.core.state_manager import state_manager
 
 router = APIRouter()
 
-WOMEN_CARS = {1, 10}
+WOMEN_CARS = {1, 6}
 MAX_RECOMMENDATIONS = 3
 MIN_OCCUPANCY_SOURCE = 0.5
 MIN_IMBALANCE = 0.12
