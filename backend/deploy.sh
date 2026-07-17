@@ -47,9 +47,12 @@ echo "  OK: dependencies installed"
 # --- Step 4: Create .env for production ---
 echo ""
 echo "[4/7] Checking .env configuration..."
-if [ ! -f ".env" ]; then
-    echo "  Creating .env from template..."
-    cat > .env << 'ENVEOF'
+if [ -f ".env" ]; then
+    echo "  Backing up existing .env to .env.bak..."
+    cp .env .env.bak
+fi
+echo "  Creating production .env..."
+cat > .env << 'ENVEOF'
 APP_NAME=PROJECT THEMIS
 APP_VERSION=6.0.0
 APP_ENV=production
@@ -62,15 +65,12 @@ JWT_SECRET=change-this-to-a-random-secret-in-production
 CORS_ORIGINS=["https://garudahacks.my.id","https://api.themis.my.id"]
 LOG_LEVEL=INFO
 ENVEOF
-    echo "  WARNING: Edit .env with your actual secrets!"
-else
-    echo "  OK: .env exists"
-fi
+echo "  WARNING: Edit .env with your actual secrets (especially JWT_SECRET)!"
 
 # --- Step 5: Create database tables ---
 echo ""
 echo "[5/7] Ensuring database tables exist..."
-python -c "
+$PYTHON_VERSION -c "
 import pymysql; pymysql.install_as_MySQLdb()
 from app.database.connection import engine, Base
 from app.database.models import *
@@ -81,7 +81,7 @@ print('  OK: All tables created/verified')
 # --- Step 6: Create systemd service ---
 echo ""
 echo "[6/7] Setting up systemd service..."
-sudo cat > /etc/systemd/system/${SERVICE_NAME}.service << SVCEOF
+sudo tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null << SVCEOF
 [Unit]
 Description=THEMIS FastAPI Backend
 After=network.target docker.service

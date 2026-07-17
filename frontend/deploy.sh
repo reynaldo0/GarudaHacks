@@ -51,6 +51,8 @@ rsync -av --delete \
   --exclude 'node_modules' \
   --exclude '.next' \
   --exclude '.git' \
+  --exclude '.env.local' \
+  --exclude '.env.production' \
   "$SCRIPT_DIR/" "$APP_DIR/"
 
 # --- Step 5: Install & Build ---
