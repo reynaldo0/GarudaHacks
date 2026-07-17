@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/themis"
 
     # --- AI Model (Spatial Occupancy Segmentation) ---
-    SEGMENTATION_MODEL_PATH: str = "weights/segmentation_model.pth"
+    SEGMENTATION_MODEL_PATH: str = "weights/yolo11s.pt"
     SEGMENTATION_CONFIDENCE: float = 0.5
     SEGMENTATION_IMAGE_SIZE: int = 640
 

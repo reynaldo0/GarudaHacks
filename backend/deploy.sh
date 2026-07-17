@@ -62,7 +62,7 @@ PORT=8005
 DATABASE_URL=mysql+pymysql://themis:themis_pass_2026@127.0.0.1:3306/themis
 API_KEY=da1GdehRzd59b71fwyeJDkuXY151hOO_uhIYpDSbNwazer4y3sWudjMNREYLq4Y_
 JWT_SECRET=change-this-to-a-random-secret-in-production
-CORS_ORIGINS=["https://garudahacks.my.id","https://api.themis.my.id"]
+CORS_ORIGINS=["https://themis.my.id","https://api.themis.my.id"]
 LOG_LEVEL=INFO
 ENVEOF
 echo "  WARNING: Edit .env with your actual secrets (especially JWT_SECRET)!"
