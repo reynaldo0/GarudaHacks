@@ -1,7 +1,8 @@
 import axios from "axios";
 import { SystemState, OccupancyData, Recommendation } from "@/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://api.themis.my.id:8001";
 
 function toCamelCase(str: string): string {
   return str.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
@@ -11,7 +12,10 @@ function camelizeKeys(obj: unknown): unknown {
   if (Array.isArray(obj)) return obj.map(camelizeKeys);
   if (obj !== null && typeof obj === "object" && !(obj instanceof Date)) {
     return Object.fromEntries(
-      Object.entries(obj as Record<string, unknown>).map(([k, v]) => [toCamelCase(k), camelizeKeys(v)])
+      Object.entries(obj as Record<string, unknown>).map(([k, v]) => [
+        toCamelCase(k),
+        camelizeKeys(v),
+      ]),
     );
   }
   return obj;
