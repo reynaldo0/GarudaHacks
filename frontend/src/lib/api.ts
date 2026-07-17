@@ -31,7 +31,7 @@ function camelizeKeys(obj: unknown): unknown {
 
 const api = axios.create({
   baseURL: API_BASE,
-  timeout: 10000,
+  timeout: 5000,
   headers: {
     "Content-Type": "application/json",
   },

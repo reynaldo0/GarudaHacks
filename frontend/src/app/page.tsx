@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Users, AlertTriangle, Activity, Zap, WifiOff } from "lucide-react";
+import { AlertTriangle, Activity, Zap, WifiOff } from "lucide-react";
 import { KPICard } from "@/components/KPICard";
 import { TrainOverview } from "@/components/TrainOverview";
 import { AlertPanel } from "@/components/AlertPanel";
@@ -28,7 +28,6 @@ export default function DashboardPage() {
     recommendation,
     isConnected,
   } = useAppStore();
-  const [loading, setLoading] = useState(true);
   const [backendOffline, setBackendOffline] = useState(false);
 
   useWebSocket();
@@ -42,51 +41,41 @@ export default function DashboardPage() {
         setConnected(true);
         setBackendOffline(false);
 
-        if (state?.train) {
-          try {
-            const occData = await apiClient.getOccupancy();
-            if (occData?.cars) {
-              setCars(
-                occData.cars.map((c: CarSpatialOccupancy) => ({
-                  carId: c.carId,
-                  occupancyRatio: c.occupancyRatio,
-                  freeSpaceRatio: c.freeSpaceRatio,
-                  densityIndicator: c.densityIndicator,
-                  spatialOccupancyScore: c.spatialOccupancyScore,
-                  cameraStatus: c.cameraStatus || "active",
-                  cameraId: c.cameraId,
-                  riskScore: c.riskScore,
-                  prediction: c.prediction || null,
-                }))
-              );
-            }
-          } catch {
-            setCars([]);
-          }
+        const [occData, warnData, recData] = await Promise.allSettled([
+          apiClient.getOccupancy(),
+          apiClient.getWarnings(),
+          apiClient.getRecommendation(),
+        ]);
+
+        if (occData.status === "fulfilled" && occData.value?.cars) {
+          setCars(
+            occData.value.cars.map((c: CarSpatialOccupancy) => ({
+              carId: c.carId,
+              occupancyRatio: c.occupancyRatio,
+              freeSpaceRatio: c.freeSpaceRatio,
+              densityIndicator: c.densityIndicator,
+              spatialOccupancyScore: c.spatialOccupancyScore,
+              cameraStatus: c.cameraStatus || "active",
+              cameraId: c.cameraId,
+              riskScore: c.riskScore,
+              prediction: c.prediction || null,
+            }))
+          );
         }
 
-        try {
-          const warnData = await apiClient.getWarnings();
-          if (warnData?.warnings) {
-            setWarnings(warnData.warnings);
-          }
-        } catch { /* ignore */ }
+        if (warnData.status === "fulfilled" && warnData.value?.warnings) {
+          setWarnings(warnData.value.warnings);
+        }
 
-        try {
-          const recData = await apiClient.getRecommendation();
-          if (recData) {
-            setRecommendation(recData);
-          }
-        } catch { /* ignore */ }
+        if (recData.status === "fulfilled" && recData.value) {
+          setRecommendation(recData.value);
+        }
       } catch {
         setConnected(false);
         setBackendOffline(true);
-      } finally {
-        setLoading(false);
       }
     }
     fetchInitialState();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const avgOccupancy = systemState?.occupancy?.avgOccupancyRatio ?? (
@@ -98,17 +87,6 @@ export default function DashboardPage() {
   const greenCars = systemState?.occupancy?.greenCars ?? cars.filter((c) => c.densityIndicator === "GREEN").length;
   const yellowCars = systemState?.occupancy?.yellowCars ?? cars.filter((c) => c.densityIndicator === "YELLOW").length;
   const redCars = systemState?.occupancy?.redCars ?? cars.filter((c) => c.densityIndicator === "RED").length;
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground text-sm">Connecting to backend...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (backendOffline && cars.length === 0) {
     return (

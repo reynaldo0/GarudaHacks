@@ -3,7 +3,14 @@
 import { useEffect, useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws";
+function getWsUrl(): string {
+  if (typeof window === "undefined") return "";
+  const envUrl = process.env.NEXT_PUBLIC_WS_URL;
+  if (envUrl && !envUrl.startsWith("ws://localhost")) return envUrl;
+  const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const host = window.location.host;
+  return `${proto}//${host}/ws`;
+}
 
 interface WebSocketMessage {
   type: string;
@@ -181,18 +188,20 @@ function handleMessage(message: WebSocketMessage) {
 export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const retryCountRef = useRef(0);
   const { setConnected } = useAppStore();
 
   useEffect(() => {
     function connect() {
       if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-      const ws = new WebSocket(WS_URL);
+      const ws = new WebSocket(getWsUrl());
       wsRef.current = ws;
 
       ws.onopen = () => {
         console.log("[WS] Connected to backend");
         setConnected(true);
+        retryCountRef.current = 0;
       };
 
       ws.onmessage = (event) => {
@@ -207,13 +216,15 @@ export function useWebSocket() {
       ws.onclose = () => {
         console.log("[WS] Disconnected");
         setConnected(false);
-        reconnectTimeoutRef.current = setTimeout(() => {
-          connect();
-        }, 3000);
+        const retries = retryCountRef.current;
+        if (retries < 5) {
+          const delay = Math.min(1000 * 2 ** retries, 15000);
+          retryCountRef.current = retries + 1;
+          reconnectTimeoutRef.current = setTimeout(connect, delay);
+        }
       };
 
-      ws.onerror = (error) => {
-        console.error("[WS] Error:", error);
+      ws.onerror = () => {
         ws.close();
       };
     }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { WifiOff, Loader2 } from "lucide-react";
+import { WifiOff } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { HistoryRecord, HistorySummary } from "@/types";
 import clsx from "clsx";
@@ -10,12 +10,10 @@ export default function HistoryPage() {
   const [records, setRecords] = useState<HistoryRecord[]>([]);
   const [summary, setSummary] = useState<HistorySummary | null>(null);
   const [hours, setHours] = useState(24);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
     async function fetchHistory() {
-      setLoading(true);
       setError(false);
       try {
         const data = await apiClient.getHistory(hours);
@@ -29,25 +27,12 @@ export default function HistoryPage() {
         setError(true);
         setRecords([]);
         setSummary(null);
-      } finally {
-        setLoading(false);
       }
     }
     fetchHistory();
   }, [hours]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          <p className="text-muted-foreground text-sm">Loading history...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
+  if (error && records.length === 0) {
     return (
       <div className="space-y-6">
         <div className="animate-fade-in">

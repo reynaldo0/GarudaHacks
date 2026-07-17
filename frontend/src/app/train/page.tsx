@@ -5,12 +5,11 @@ import { apiClient } from "@/lib/api";
 import { TrainOverview } from "@/components/TrainOverview";
 import { OccupancyChart } from "@/components/OccupancyChart";
 import { CarSpatialOccupancy } from "@/types";
-import { WifiOff, Loader2 } from "lucide-react";
+import { WifiOff } from "lucide-react";
 import clsx from "clsx";
 
 export default function TrainPage() {
   const [cars, setCars] = useState<CarSpatialOccupancy[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -35,25 +34,12 @@ export default function TrainPage() {
         }
       } catch {
         setError(true);
-      } finally {
-        setLoading(false);
       }
     }
     fetchOccupancy();
     const interval = setInterval(fetchOccupancy, 3000);
     return () => clearInterval(interval);
   }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          <p className="text-muted-foreground text-sm">Loading train data...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (error && cars.length === 0) {
     return (
