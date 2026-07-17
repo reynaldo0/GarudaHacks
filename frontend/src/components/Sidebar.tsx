@@ -92,7 +92,7 @@ export function Sidebar() {
 
         <div className="px-6 pb-4">
           <p className="text-[10px] text-muted-foreground">
-            THEMIS v6.0 &middot; Garuda Hacks
+            THEMIS &middot; Garuda Hacks
           </p>
         </div>
       </div>
