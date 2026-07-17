@@ -7,7 +7,7 @@ import {
 } from "@/types";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_URL || "";
 
 const FRAME_API_KEY =
   process.env.NEXT_PUBLIC_FRAME_API_KEY || "themis-unity-key-2026";

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" fill="none">
+  <!-- Icon -->
+  <g transform="translate(8, 8)">
+    <!-- Background circle -->
+    <circle cx="32" cy="32" r="30" fill="#2D2A70"/>
+    <circle cx="32" cy="32" r="28" fill="#2D2A70" stroke="#EC6C25" stroke-width="1.5" opacity="0.6"/>
+    
+    <!-- Train body -->
+    <rect x="12" y="24" width="40" height="16" rx="4" fill="#EC6C25" opacity="0.9"/>
+    
+    <!-- Train windows -->
+    <rect x="15" y="27" width="7" height="10" rx="1.5" fill="#FFFFFF" opacity="0.9"/>
+    <rect x="24" y="27" width="7" height="10" rx="1.5" fill="#FFFFFF" opacity="0.7"/>
+    <rect x="33" y="27" width="7" height="10" rx="1.5" fill="#FFFFFF" opacity="0.5"/>
+    <rect x="42" y="27" width="7" height="10" rx="1.5" fill="#FFFFFF" opacity="0.3"/>
+    
+    <!-- AI Eye -->
+    <ellipse cx="32" cy="32" rx="18" ry="10" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.4"/>
+    <circle cx="32" cy="32" r="5" fill="#EC6C25" stroke="#FFFFFF" stroke-width="1.5"/>
+    <circle cx="32" cy="32" r="2" fill="#FFFFFF"/>
+    
+    <!-- Neural nodes -->
+    <circle cx="16" cy="18" r="2" fill="#EC6C25" opacity="0.8"/>
+    <circle cx="48" cy="18" r="2" fill="#EC6C25" opacity="0.8"/>
+    <circle cx="16" cy="46" r="2" fill="#EC6C25" opacity="0.8"/>
+    <circle cx="48" cy="46" r="2" fill="#EC6C25" opacity="0.8"/>
+    
+    <!-- Connections -->
+    <line x1="16" y1="18" x2="32" y2="32" stroke="#EC6C25" stroke-width="0.8" opacity="0.4"/>
+    <line x1="48" y1="18" x2="32" y2="32" stroke="#EC6C25" stroke-width="0.8" opacity="0.4"/>
+    <line x1="16" y1="46" x2="32" y2="32" stroke="#EC6C25" stroke-width="0.8" opacity="0.4"/>
+    <line x1="48" y1="46" x2="32" y2="32" stroke="#EC6C25" stroke-width="0.8" opacity="0.4"/>
+    
+    <!-- Rail track -->
+    <line x1="10" y1="44" x2="54" y2="44" stroke="#FFFFFF" stroke-width="1.5" opacity="0.3"/>
+    <line x1="10" y1="46" x2="54" y2="46" stroke="#FFFFFF" stroke-width="0.8" opacity="0.2"/>
+  </g>
+  
+  <!-- Wordmark -->
+  <text x="82" y="46" fill="#2D2A70" font-family="system-ui, -apple-system, sans-serif" font-size="36" font-weight="800" letter-spacing="-1">THEMIS</text>
+  
+  <!-- Subtitle -->
+  <text x="82" y="64" fill="#64748B" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500" letter-spacing="2">SPATIAL INTELLIGENCE</text>
+</svg>

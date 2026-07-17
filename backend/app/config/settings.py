@@ -27,14 +27,14 @@ class Settings(BaseSettings):
 
     # --- Server ---
     HOST: str = "0.0.0.0"
-    PORT: int = 8000
+    PORT: int = 8005
     WORKERS: int = 1
 
     # --- Database ---
     DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/themis"
 
     # --- AI Model (Spatial Occupancy Segmentation) ---
-    SEGMENTATION_MODEL_PATH: str = "weights/segmentation_model.pth"
+    SEGMENTATION_MODEL_PATH: str = "weights/yolo11s.pt"
     SEGMENTATION_CONFIDENCE: float = 0.5
     SEGMENTATION_IMAGE_SIZE: int = 640
 
@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     DENSITY_RED_THRESHOLD: float = 0.0     # free_space < 30% = RED
 
     # --- Train Configuration ---
-    DEFAULT_TRAIN_FORMATION: str = "SF10"
+    DEFAULT_TRAIN_FORMATION: str = "SF6"
     DEFAULT_CAPACITY: int = 200
     FLOOR_AREA_M2: float = 42.0  # Average floor area per car (m^2)
 

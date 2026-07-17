@@ -9,8 +9,12 @@ import os
 import sys
 from logging.config import fileConfig
 
+from dotenv import load_dotenv
 from sqlalchemy import engine_from_config, pool
 from alembic import context
+
+# Load .env file
+load_dotenv()
 
 # Add the backend directory to sys.path so 'app' module is importable
 sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))

@@ -80,10 +80,10 @@ echo ═════════════════════════
 echo                    PROJECT THEMIS - FastAPI Backend
 echo ═══════════════════════════════════════════════════════════════════════════
 echo.
-echo  Server  : http://localhost:8000
-echo  Docs    : http://localhost:8000/docs
-echo  ReDoc   : http://localhost:8000/redoc
-echo  Health  : http://localhost:8000/api/v1/health
+echo  Server  : http://localhost:8005
+echo  Docs    : http://localhost:8005/docs
+echo  ReDoc   : http://localhost:8005/redoc
+echo  Health  : http://localhost:8005/api/v1/health
 echo.
 echo ═══════════════════════════════════════════════════════════════════════════
 echo.
@@ -91,7 +91,7 @@ echo.
 REM Start FastAPI server with uvicorn
 echo [INFO] Starting FastAPI server...
 echo.
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-level info
+uvicorn main:app --host 0.0.0.0 --port 8005 --reload --log-level info
 
 REM If server stops
 echo.

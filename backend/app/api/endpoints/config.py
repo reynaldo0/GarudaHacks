@@ -16,7 +16,7 @@ async def get_config():
     Get current system configuration.
     """
     cameras = []
-    for i in range(1, 11):
+    for i in range(1, 7):
         for j in range(1, 5):
             cam_id = f"car{str(i).zfill(2)}_cam{str(j).zfill(2)}"
             cameras.append({
@@ -32,8 +32,8 @@ async def get_config():
         "success": True,
         "data": {
             "train": {
-                "formation": "SF10",
-                "totalCars": 10,
+                "formation": "SF6",
+                "totalCars": 6,
                 "capacityPerCar": 200,
             },
             "occupancy": {
@@ -47,7 +47,7 @@ async def get_config():
                 "confidence": 0.5,
                 "imageSize": 640,
                 "camerasPerCar": 4,
-                "totalCameras": 40,
+                "totalCameras": 24,
             },
         },
     }
@@ -57,7 +57,7 @@ async def get_config():
 async def get_lookup_table():
     """Get camera to car mapping lookup table."""
     mappings = []
-    for i in range(1, 11):
+    for i in range(1, 7):
         for j in range(1, 5):
             cam_id = f"car{str(i).zfill(2)}_cam{str(j).zfill(2)}"
             mappings.append({

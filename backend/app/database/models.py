@@ -2,7 +2,7 @@
 PROJECT THEMIS - Database Models
 Version: 6.0
 
-SQLAlchemy models for PostgreSQL database.
+SQLAlchemy models for MySQL database.
 """
 
 from datetime import datetime

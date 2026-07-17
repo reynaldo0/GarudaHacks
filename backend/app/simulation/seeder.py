@@ -3,7 +3,7 @@ PROJECT THEMIS - Simulation Seeder
 Version: 6.0
 
 Comprehensive data seeder with realistic KRL Commuter Line data patterns.
-Populates the State Manager with spatial occupancy data for the SF10 formation.
+Populates the State Manager with spatial occupancy data for the SF6 formation.
 """
 
 import random
@@ -14,10 +14,10 @@ from typing import Dict, List, Optional
 from app.core.state_manager import state_manager
 from app.core.integration_hub import integration_hub
 
-# ─── SF10 Formation Constants ──────────────────────────────────────────────────
-TRAIN_ID = "SF10-001"
-TOTAL_CARS = 10
-FORMATION = "SF10"
+# ─── SF6 Formation Constants ──────────────────────────────────────────────────
+TRAIN_ID = "SF6-001"
+TOTAL_CARS = 6
+FORMATION = "SF6"
 FLOOR_AREA_M2 = 42.0
 
 # Camera IDs: 4 ceiling fisheye cameras per car
@@ -43,22 +43,18 @@ SCENARIOS = {
     "empty": {
         "description": "Empty train - no passengers",
         "pattern": "empty",
-        "cars": [{"car_id": i, "occupancy_ratio": 0.0} for i in range(1, 11)],
+        "cars": [{"car_id": i, "occupancy_ratio": 0.0} for i in range(1, 7)],
     },
     "normal": {
         "description": "Normal operation - balanced mid-day traffic",
         "pattern": "normal",
         "cars": [
-            {"car_id": 1, "occupancy_ratio": 0.42},
-            {"car_id": 2, "occupancy_ratio": 0.36},
-            {"car_id": 3, "occupancy_ratio": 0.34},
-            {"car_id": 4, "occupancy_ratio": 0.38},
-            {"car_id": 5, "occupancy_ratio": 0.40},
-            {"car_id": 6, "occupancy_ratio": 0.39},
-            {"car_id": 7, "occupancy_ratio": 0.35},
-            {"car_id": 8, "occupancy_ratio": 0.32},
-            {"car_id": 9, "occupancy_ratio": 0.29},
-            {"car_id": 10, "occupancy_ratio": 0.31},
+            {"car_id": 1, "occupancy_ratio": 0.38},
+            {"car_id": 2, "occupancy_ratio": 0.42},
+            {"car_id": 3, "occupancy_ratio": 0.35},
+            {"car_id": 4, "occupancy_ratio": 0.40},
+            {"car_id": 5, "occupancy_ratio": 0.33},
+            {"car_id": 6, "occupancy_ratio": 0.30},
         ],
     },
     "peak_hour": {
@@ -67,14 +63,10 @@ SCENARIOS = {
         "cars": [
             {"car_id": 1, "occupancy_ratio": 0.88},
             {"car_id": 2, "occupancy_ratio": 0.80},
-            {"car_id": 3, "occupancy_ratio": 0.72},
-            {"car_id": 4, "occupancy_ratio": 0.78},
-            {"car_id": 5, "occupancy_ratio": 0.92},
-            {"car_id": 6, "occupancy_ratio": 0.97},
-            {"car_id": 7, "occupancy_ratio": 0.85},
-            {"car_id": 8, "occupancy_ratio": 0.70},
-            {"car_id": 9, "occupancy_ratio": 0.65},
-            {"car_id": 10, "occupancy_ratio": 0.55},
+            {"car_id": 3, "occupancy_ratio": 0.92},
+            {"car_id": 4, "occupancy_ratio": 0.97},
+            {"car_id": 5, "occupancy_ratio": 0.72},
+            {"car_id": 6, "occupancy_ratio": 0.65},
         ],
     },
     "holiday": {
@@ -83,14 +75,10 @@ SCENARIOS = {
         "cars": [
             {"car_id": 1, "occupancy_ratio": 0.18},
             {"car_id": 2, "occupancy_ratio": 0.14},
-            {"car_id": 3, "occupancy_ratio": 0.11},
-            {"car_id": 4, "occupancy_ratio": 0.15},
-            {"car_id": 5, "occupancy_ratio": 0.20},
-            {"car_id": 6, "occupancy_ratio": 0.22},
-            {"car_id": 7, "occupancy_ratio": 0.16},
-            {"car_id": 8, "occupancy_ratio": 0.12},
-            {"car_id": 9, "occupancy_ratio": 0.09},
-            {"car_id": 10, "occupancy_ratio": 0.07},
+            {"car_id": 3, "occupancy_ratio": 0.22},
+            {"car_id": 4, "occupancy_ratio": 0.12},
+            {"car_id": 5, "occupancy_ratio": 0.09},
+            {"car_id": 6, "occupancy_ratio": 0.07},
         ],
     },
     "imbalanced": {
@@ -100,13 +88,9 @@ SCENARIOS = {
             {"car_id": 1, "occupancy_ratio": 0.97},
             {"car_id": 2, "occupancy_ratio": 0.94},
             {"car_id": 3, "occupancy_ratio": 0.90},
-            {"car_id": 4, "occupancy_ratio": 0.48},
-            {"car_id": 5, "occupancy_ratio": 0.20},
-            {"car_id": 6, "occupancy_ratio": 0.15},
-            {"car_id": 7, "occupancy_ratio": 0.12},
-            {"car_id": 8, "occupancy_ratio": 0.10},
-            {"car_id": 9, "occupancy_ratio": 0.08},
-            {"car_id": 10, "occupancy_ratio": 0.05},
+            {"car_id": 4, "occupancy_ratio": 0.20},
+            {"car_id": 5, "occupancy_ratio": 0.10},
+            {"car_id": 6, "occupancy_ratio": 0.05},
         ],
     },
     "emergency": {
@@ -114,15 +98,11 @@ SCENARIOS = {
         "pattern": "emergency",
         "cars": [
             {"car_id": 1, "occupancy_ratio": 0.99},
-            {"car_id": 2, "occupancy_ratio": 0.98},
-            {"car_id": 3, "occupancy_ratio": 0.95},
-            {"car_id": 4, "occupancy_ratio": 0.93},
-            {"car_id": 5, "occupancy_ratio": 0.91},
-            {"car_id": 6, "occupancy_ratio": 0.88},
-            {"car_id": 7, "occupancy_ratio": 0.85},
-            {"car_id": 8, "occupancy_ratio": 0.82},
-            {"car_id": 9, "occupancy_ratio": 0.78},
-            {"car_id": 10, "occupancy_ratio": 0.75},
+            {"car_id": 2, "occupancy_ratio": 0.96},
+            {"car_id": 3, "occupancy_ratio": 0.93},
+            {"car_id": 4, "occupancy_ratio": 0.90},
+            {"car_id": 5, "occupancy_ratio": 0.88},
+            {"car_id": 6, "occupancy_ratio": 0.85},
         ],
     },
 }
@@ -279,7 +259,7 @@ def load_scenario(scenario_name: str, train_id: str = TRAIN_ID) -> Optional[Dict
             camera_id=camera_id,
         )
 
-    # Set camera status for all 40 cameras
+    # Set camera status for all 24 cameras
     for cam_id in CAMERA_IDS:
         state_manager.update_camera_status(cam_id, {
             "status": "online",

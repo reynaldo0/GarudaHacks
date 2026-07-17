@@ -1,9 +1,12 @@
 """
 PROJECT THEMIS - Database Connection
-Version: 5.0
+Version: 6.0
 
-PostgreSQL database connection and session management.
+MySQL database connection via PyMySQL.
 """
+
+import pymysql
+pymysql.install_as_MySQLdb()
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
@@ -14,6 +17,7 @@ engine = create_engine(
     settings.DATABASE_URL,
     echo=settings.APP_DEBUG,
     pool_pre_ping=True,
+    pool_recycle=3600,
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

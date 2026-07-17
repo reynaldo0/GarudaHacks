@@ -14,6 +14,7 @@ from typing import Optional, List
 from app.core.state_manager import state_manager
 from app.core.integration_hub import integration_hub
 from app.core.security import verify_api_key
+from app.services.persistence import persist_pipeline_result
 
 router = APIRouter()
 
@@ -37,7 +38,7 @@ async def receive_frame(
     files: List[UploadFile] = File(...),
     camera_ids: Optional[str] = Form(default=None),
     station_id: str = Form(default="unknown"),
-    train_id: str = Form(default="SF10-001"),
+    train_id: str = Form(default="SF6-001"),
     _auth=Depends(verify_api_key_header),
 ):
     """
@@ -206,6 +207,25 @@ def _process_frames(
         "timestamp": datetime.utcnow().isoformat(),
     }
 
+    # 13. Persist to database
+    persist_pipeline_result(
+        train_id=train_id,
+        car_id=car_id,
+        station_id=station_id,
+        camera_ids=camera_ids,
+        occupancy_ratio=occ_metrics.get("occupancy_ratio", 0),
+        free_space_ratio=occ_metrics.get("free_space_ratio", 1),
+        spatial_occupancy_score=fused.get("spatial_occupancy_score", 0),
+        density_indicator=density_result.get("density_indicator", "GREEN"),
+        cales_score=cales_result.get("cales_score", 0),
+        health_index=cales_result.get("health_index", 100),
+        damage_multiplier=cales_result.get("damage_multiplier", 1.0),
+        redistribution_result=redistribution_result,
+        door_action=door_result.get("door_action", "CLOSE"),
+        announcement_text=announcement_result.get("text") if announcement_result else None,
+        warning=warning,
+    )
+
     return {
         "success": True,
         "data": pipeline_state,
@@ -230,12 +250,33 @@ def _get_all_car_data(train_id: str) -> list:
 
 
 async def _broadcast_pipeline_state(result: dict, train_id: str):
-    """Broadcast pipeline state via WebSocket."""
+    """Broadcast pipeline state and full occupancy via WebSocket."""
     try:
         data = result.get("data", {})
         await integration_hub.broadcast_pipeline_state_updated(
             pipeline_state=data,
             train_id=train_id,
         )
+
+        # Broadcast full occupancy for all cars
+        train_state = state_manager.get_train_state(train_id)
+        if train_state:
+            cars_data = []
+            for c in train_state.cars:
+                cars_data.append({
+                    "car_id": c.car_id,
+                    "occupancy_ratio": getattr(c, 'occupancy_ratio', 0),
+                    "free_space_ratio": getattr(c, 'free_space_ratio', 1),
+                    "density_indicator": getattr(c, 'density_indicator', 'GREEN'),
+                    "spatial_occupancy_score": getattr(c, 'spatial_occupancy_score', 0),
+                    "risk_score": getattr(c, 'risk_score', 0),
+                    "camera_id": getattr(c, 'camera_id', None),
+                    "camera_status": "active",
+                })
+            await integration_hub.broadcast("occupancy_updated", {
+                "train_id": train_id,
+                "cars": cars_data,
+            }, train_id)
+
     except Exception as e:
         print(f"[Frame] Broadcast error: {e}")

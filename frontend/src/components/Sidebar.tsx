@@ -16,7 +16,7 @@ import clsx from "clsx";
 import { useAppStore } from "@/store/useAppStore";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/train", label: "Train Status", icon: Train },
   { href: "/upload", label: "Frame Upload", icon: Camera },
   { href: "/history", label: "History", icon: History },

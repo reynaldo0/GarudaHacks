@@ -1,9 +1,13 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isLandingPage = pathname === "/";
+
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -18,6 +22,10 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         </div>
       </body>
     );
+  }
+
+  if (isLandingPage) {
+    return <body className="min-h-full bg-background">{children}</body>;
   }
 
   return (

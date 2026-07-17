@@ -42,7 +42,7 @@ async def load_scenario_endpoint(scenario_name: str):
         return {"success": False, "error": "Scenario load failed"}
 
     # Broadcast full state (occupancy + predictions + warnings + cameras)
-    await broadcast_full_state("SF10-001")
+    await broadcast_full_state("SF6-001")
 
     return {
         "success": True,

@@ -33,7 +33,7 @@ class IntegrationHub:
         """Set the WebSocket connection manager."""
         self._websocket_manager = manager
 
-    async def broadcast(self, event_type: str, data: Dict[str, Any], train_id: str = "SF10-001"):
+    async def broadcast(self, event_type: str, data: Dict[str, Any], train_id: str = "SF6-001"):
         """Broadcast event to all connected WebSocket clients."""
         message = {
             "type": event_type,
@@ -54,30 +54,30 @@ class IntegrationHub:
             except Exception as e:
                 print(f"[IntegrationHub] Broadcast error: {e}")
 
-    async def broadcast_pipeline_state_updated(self, pipeline_state: Dict[str, Any], train_id: str = "SF10-001"):
+    async def broadcast_pipeline_state_updated(self, pipeline_state: Dict[str, Any], train_id: str = "SF6-001"):
         """Broadcast pipeline state update (main V6 event)."""
         await self.broadcast("pipeline_state_updated", pipeline_state, train_id)
 
-    async def broadcast_warning_updated(self, warning: Dict[str, Any], train_id: str = "SF10-001"):
+    async def broadcast_warning_updated(self, warning: Dict[str, Any], train_id: str = "SF6-001"):
         """Broadcast warning update event."""
         await self.broadcast("warning_updated", {
             "warning": warning,
         }, train_id)
 
-    async def broadcast_camera_status_updated(self, camera_id: str, status: str, train_id: str = "SF10-001"):
+    async def broadcast_camera_status_updated(self, camera_id: str, status: str, train_id: str = "SF6-001"):
         """Broadcast camera status update event."""
         await self.broadcast("camera_status_updated", {
             "camera_id": camera_id,
             "status": status,
         }, train_id)
 
-    async def broadcast_simulation_reset(self, message: str = "Simulation reset", train_id: str = "SF10-001"):
+    async def broadcast_simulation_reset(self, message: str = "Simulation reset", train_id: str = "SF6-001"):
         """Broadcast simulation reset event."""
         await self.broadcast("simulation_reset", {
             "message": message,
         }, train_id)
 
-    async def broadcast_system_health_updated(self, health: Dict[str, Any], train_id: str = "SF10-001"):
+    async def broadcast_system_health_updated(self, health: Dict[str, Any], train_id: str = "SF6-001"):
         """Broadcast system health update event."""
         await self.broadcast("system_health_updated", {
             "health": health,

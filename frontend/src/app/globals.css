@@ -139,3 +139,12 @@ body {
   -webkit-mask-composite: xor;
   pointer-events: none;
 }
+
+@keyframes arrow-flow {
+  from { stroke-dashoffset: 28; }
+  to { stroke-dashoffset: 0; }
+}
+
+.animate-arrow-flow {
+  animation: arrow-flow 1.2s linear infinite;
+}

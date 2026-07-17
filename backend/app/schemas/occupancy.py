@@ -26,8 +26,8 @@ class CarSpatialOccupancy(BaseModel):
 # --- Train State ---
 class TrainState(BaseModel):
     train_id: str
-    formation: str = "SF10"
-    total_cars: int = 10
+    formation: str = "SF6"
+    total_cars: int = 6
     cars: List[CarSpatialOccupancy] = []
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
