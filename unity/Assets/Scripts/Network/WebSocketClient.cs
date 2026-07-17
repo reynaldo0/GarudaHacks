@@ -12,7 +12,7 @@ namespace Themis.Unity.Network
     public class WebSocketClient : MonoBehaviour
     {
         [Header("Configuration")]
-        [SerializeField] private string wsUrl = "ws://localhost:8000/ws";
+        [SerializeField] private string wsUrl = "ws://localhost:8005/ws";
         [SerializeField] private float reconnectDelay = 3f;
         [SerializeField] private float heartbeatInterval = 30f;
 

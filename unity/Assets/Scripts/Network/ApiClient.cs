@@ -9,7 +9,7 @@ namespace Themis.Unity.Network
     public class ApiClient : MonoBehaviour
     {
         [Header("Configuration")]
-        [SerializeField] private string baseUrl = "http://localhost:8000";
+        [SerializeField] private string baseUrl = "http://localhost:8005";
         [SerializeField] private float timeout = 10f;
         [SerializeField] private string apiKey = "themis-unity-key-2026";
 

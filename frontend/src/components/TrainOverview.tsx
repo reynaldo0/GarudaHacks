@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { Camera, TrendingUp, TrendingDown, Minus, Users } from "lucide-react";
+import { Camera, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Recommendation, CarSpatialOccupancy } from "@/types";
 
 interface TrainOverviewProps {

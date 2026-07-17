@@ -1,7 +1,7 @@
 "use client";
 
 import { Recommendation } from "@/types";
-import { CheckCircle, Sparkles, Users } from "lucide-react";
+import { CheckCircle, Sparkles } from "lucide-react";
 import clsx from "clsx";
 
 interface RecommendationPanelProps {

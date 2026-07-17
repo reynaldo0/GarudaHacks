@@ -16,7 +16,7 @@ pydantic-settings==2.4.0
 # --- Database ---
 sqlalchemy==2.0.31
 alembic==1.13.1
-psycopg2-binary==2.9.9
+pymysql==1.1.1
 
 # --- AI / Computer Vision ---
 ultralytics==8.4.96

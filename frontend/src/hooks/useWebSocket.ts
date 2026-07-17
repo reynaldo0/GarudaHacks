@@ -5,8 +5,6 @@ import { useAppStore } from "@/store/useAppStore";
 
 function getWsUrl(): string {
   if (typeof window === "undefined") return "";
-  const envUrl = process.env.NEXT_PUBLIC_WS_URL;
-  if (envUrl && !envUrl.startsWith("ws://localhost")) return envUrl;
   const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
   const host = window.location.host;
   return `${proto}//${host}/ws`;
@@ -69,25 +67,43 @@ function handleMessage(message: WebSocketMessage) {
     case "occupancy_updated": {
       if (message.data) {
         const d = message.data;
-        const carIdNum = d.car_id as number;
-        if (carIdNum > 0) {
-          const currentCars = [...store.cars];
-          const idx = currentCars.findIndex((c) => c.carId === carIdNum);
-          if (idx >= 0) {
-            currentCars[idx] = {
-              ...currentCars[idx],
-              occupancyRatio: (d.occupancy_ratio as number) ?? currentCars[idx].occupancyRatio,
-              freeSpaceRatio: (d.free_space_ratio as number) ?? currentCars[idx].freeSpaceRatio,
-              densityIndicator: (d.density_indicator as "GREEN" | "YELLOW" | "RED") ?? currentCars[idx].densityIndicator,
-            };
-            store.setCars(currentCars);
+        const carsList = d.cars as Array<Record<string, unknown>> | undefined;
+        if (carsList && Array.isArray(carsList)) {
+          const mapped: import("@/types").CarSpatialOccupancy[] = carsList.map((c) => ({
+            carId: (c.car_id as number) ?? 0,
+            occupancyRatio: (c.occupancy_ratio as number) ?? 0,
+            freeSpaceRatio: (c.free_space_ratio as number) ?? 1,
+            densityIndicator: (c.density_indicator as "GREEN" | "YELLOW" | "RED") ?? "GREEN",
+            spatialOccupancyScore: (c.spatial_occupancy_score as number) ?? 0,
+            cameraStatus: (c.camera_status as string) || "active",
+            cameraId: (c.camera_id as string) || undefined,
+            riskScore: (c.risk_score as number) ?? 0,
+            prediction: null,
+          }));
+          store.setCars(mapped);
+        } else {
+          const carIdNum = d.car_id as number;
+          if (carIdNum > 0) {
+            const currentCars = [...store.cars];
+            const idx = currentCars.findIndex((c) => c.carId === carIdNum);
+            if (idx >= 0) {
+              currentCars[idx] = {
+                ...currentCars[idx],
+                occupancyRatio: (d.occupancy_ratio as number) ?? currentCars[idx].occupancyRatio,
+                freeSpaceRatio: (d.free_space_ratio as number) ?? currentCars[idx].freeSpaceRatio,
+                densityIndicator: (d.density_indicator as "GREEN" | "YELLOW" | "RED") ?? currentCars[idx].densityIndicator,
+              };
+              store.setCars(currentCars);
+            }
           }
         }
         store.addTimelineEvent({
           id: `occ-${Date.now()}`,
           timestamp: ts,
           type: "occupancy",
-          message: `Car ${d.car_id}: ${((d.occupancy_ratio as number) ?? 0).toFixed(2)} [${d.density_indicator ?? "GREEN"}]`,
+          message: Array.isArray(carsList)
+            ? `Occupancy updated: ${carsList.length} cars`
+            : `Car ${d.car_id}: ${((d.occupancy_ratio as number) ?? 0).toFixed(2)} [${d.density_indicator ?? "GREEN"}]`,
           severity: "info",
         });
       }

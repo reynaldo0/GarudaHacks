@@ -1,13 +1,13 @@
 {
   "info": {
     "name": "PROJECT THEMIS - Backend API V6",
-    "description": "Complete API test collection for PROJECT THEMIS Backend V6\n\nBase URL: http://localhost:8000\nWebSocket URL: ws://localhost:8000/ws\nAPI Key: themis-unity-key-2026\n\nAll endpoints return JSON with 'success' field and 'data' field.\n\nCamera naming: car{XX}_cam{YY} (40 cameras, 4 per car)\n  car01_cam01 = Car 1, front_left\n  car01_cam02 = Car 1, front_right\n  car01_cam03 = Car 1, rear_left\n  car01_cam04 = Car 1, rear_right\n  ...\n  car10_cam04 = Car 10, rear_right\n\nPipelineState is the main response format for all car data.\n\nImport this collection into Postman to test all endpoints.",
+    "description": "Complete API test collection for PROJECT THEMIS Backend V6\n\nBase URL: http://localhost:8005\nWebSocket URL: ws://localhost:8005/ws\nAPI Key: themis-unity-key-2026\n\nAll endpoints return JSON with 'success' field and 'data' field.\n\nCamera naming: car{XX}_cam{YY} (40 cameras, 4 per car)\n  car01_cam01 = Car 1, front_left\n  car01_cam02 = Car 1, front_right\n  car01_cam03 = Car 1, rear_left\n  car01_cam04 = Car 1, rear_right\n  ...\n  car10_cam04 = Car 10, rear_right\n\nPipelineState is the main response format for all car data.\n\nImport this collection into Postman to test all endpoints.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8000"
+      "value": "http://localhost:8005"
     },
     {
       "key": "apiKey",
@@ -877,7 +877,7 @@
           "name": "WS /ws - Real-time PipelineState",
           "request": {
             "method": "GET",
-            "url": "ws://localhost:8000/ws",
+            "url": "ws://localhost:8005/ws",
             "description": "WebSocket endpoint for real-time updates.\n\nConnect using WebSocket client (Postman WS tab, wscat, or browser).\n\nEvents received:\n\n1. pipeline_state_updated (main V6 event)\n```json\n{\n  \"type\": \"pipeline_state_updated\",\n  \"train_id\": \"SF10-001\",\n  \"timestamp\": \"2026-07-15T...\",\n  \"data\": {\n    \"car_id\": \"car_04\",\n    \"occupancy_ratio\": 0.78,\n    \"free_space_ratio\": 0.22,\n    \"density_indicator\": \"RED\",\n    \"spatial_occupancy_score\": 0.78,\n    \"recommended_target\": \"car_08\",\n    \"door_action\": \"OPEN_MIDDLE\",\n    \"announcement\": \"Carriage 8 has available capacity...\",\n    \"cales_score\": 0.45,\n    \"health_index\": 55.0,\n    \"damage_multiplier\": 1.5,\n    \"inspection_priority\": 2,\n    \"recommended_action\": \"SCHEDULE_INSPECTION\"\n  }\n}\n```\n\n2. warning_updated\n```json\n{\n  \"type\": \"warning_updated\",\n  \"data\": {\n    \"warning\": {\n      \"train_id\": \"SF10-001\",\n      \"car_id\": 4,\n      \"warning_type\": \"RED_DENSITY\",\n      \"severity\": \"CRITICAL\",\n      \"message\": \"Car 4 is RED density (occupancy: 78%)\",\n      \"is_active\": true\n    }\n  }\n}\n```\n\n3. camera_status_updated\n```json\n{\n  \"type\": \"camera_status_updated\",\n  \"data\": {\n    \"camera_id\": \"car04_cam01\",\n    \"status\": \"online\"\n  }\n}\n```\n\n4. simulation_reset\n5. system_health_updated"
           },
           "response": []

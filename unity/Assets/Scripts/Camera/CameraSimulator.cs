@@ -14,7 +14,7 @@ namespace Themis.Unity.Camera
         [SerializeField] private int captureWidth = 640;
         [SerializeField] private int captureHeight = 640;
         [SerializeField] private float captureInterval = 5f;
-        [SerializeField] private string apiUrl = "http://localhost:8000";
+        [SerializeField] private string apiUrl = "http://localhost:8005";
 
         [Header("Fisheye Settings")]
         [SerializeField] private float fisheyeFOV = 170f;
