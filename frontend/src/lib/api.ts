@@ -2,7 +2,7 @@ import axios from "axios";
 import { SystemState, OccupancyData, Recommendation } from "@/types";
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "http://api.themis.my.id:8001";
+  process.env.NEXT_PUBLIC_API_URL || "https://api.themis.my.id:8001";
 
 function toCamelCase(str: string): string {
   return str.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
